@@ -6,6 +6,24 @@ description: >
   vertical slices — without reordering the plan or dropping Spec-Kit's
   dependency and parallelization markers. Use whenever tasks.md is too coarse
   for tight implement→review cycles.
+metadata:
+  sources:
+    - kind: github-file
+      repo: github/spec-kit
+      path: templates/commands/tasks.md
+      url: https://github.com/github/spec-kit/blob/main/templates/commands/tasks.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
+    - kind: github-file
+      repo: github/spec-kit
+      path: spec-driven.md
+      url: https://github.com/github/spec-kit/blob/main/spec-driven.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
 ---
 
 # refine-slices — make the slices small

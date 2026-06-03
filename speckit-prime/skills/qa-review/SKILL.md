@@ -7,6 +7,24 @@ description: >
   the right owner, and re-reviews — with a hard per-slice iteration budget so it
   converges instead of spinning. Escalates unconvergeable slices to the
   orchestrator. Use after each slice is implemented.
+metadata:
+  sources:
+    - kind: github-file
+      repo: github/spec-kit
+      path: templates/commands/analyze.md
+      url: https://github.com/github/spec-kit/blob/main/templates/commands/analyze.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
+    - kind: github-file
+      repo: github/spec-kit
+      path: docs/reference/workflows.md
+      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
 ---
 
 # qa-review — review, refine, converge

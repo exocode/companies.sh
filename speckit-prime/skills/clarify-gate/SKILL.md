@@ -7,6 +7,16 @@ description: >
   by default and ensures the human is interrupted only when it truly matters —
   and only through the orchestrator. Used by the orchestrator and every
   specialist that hits an open question.
+metadata:
+  sources:
+    - kind: github-file
+      repo: github/spec-kit
+      path: README.md
+      url: https://github.com/github/spec-kit/blob/main/README.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
 ---
 
 # clarify-gate — when to ask the human

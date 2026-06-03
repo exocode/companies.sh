@@ -6,6 +6,24 @@ description: >
   tasks.md, checklists, analyze report) and unresolved [NEEDS CLARIFICATION]
   markers. Returns the earliest incomplete phase so a run resumes instead of
   restarting from scratch. Use at the start of every spec-flow run.
+metadata:
+  sources:
+    - kind: github-file
+      repo: github/spec-kit
+      path: docs/reference/workflows.md
+      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
+    - kind: github-file
+      repo: github/spec-kit
+      path: README.md
+      url: https://github.com/github/spec-kit/blob/main/README.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
 ---
 
 # resume-detect — find where to start
