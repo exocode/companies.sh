@@ -8,6 +8,32 @@ description: >
   Runs without human intervention; escalates to a human only on material
   ambiguity, and only through the orchestrator. Runtime-agnostic — works with
   any Spec-Kit-compatible agent runtime.
+metadata:
+  sources:
+    - kind: github-file
+      repo: github/spec-kit
+      path: README.md
+      url: https://github.com/github/spec-kit/blob/main/README.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
+    - kind: github-file
+      repo: github/spec-kit
+      path: docs/reference/workflows.md
+      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
+    - kind: github-file
+      repo: github/spec-kit
+      path: spec-driven.md
+      url: https://github.com/github/spec-kit/blob/main/spec-driven.md
+      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
+      attribution: GitHub
+      license: MIT
+      usage: referenced
 ---
 
 # spec-flow — autonomous Spec-Kit pipeline
@@ -109,3 +135,30 @@ The run is done when phase 7a reports every slice passing review against its che
 
 - **Presets.** This pipeline keys off Spec-Kit's standard artifacts, so a future Spec-Kit *preset* (a bundled constitution + plan defaults) can be layered by seeding the constitution and plan phases without changing the orchestration. See `presets/README.md`.
 - **Runtime-agnostic.** Phases are invoked as the Spec-Kit slash commands your runtime exposes (`/speckit.specify`, …). Nothing here assumes a specific agent runtime; swap Claude Code, KiloCode, Cursor, Copilot, or Gemini CLI freely.
+
+## Keeping up with Spec-Kit upstream changes
+
+All per-phase skills in this company (`speckit-constitution`, `speckit-specify`,
+`speckit-clarify`, `speckit-checklist`, `speckit-plan`, `speckit-tasks`,
+`speckit-analyze`, `speckit-implement`, plus `speckit-artifact-script-contract`)
+cite a **pinned commit** (`ed10b32014431a15c4e54e4ed7c92452230dd193`) from
+[github/spec-kit](https://github.com/github/spec-kit) in their `metadata.sources`.
+
+When Spec-Kit releases updates:
+
+1. Check the upstream diff for the pinned files:
+   `https://github.com/github/spec-kit/compare/<pinned-commit>...main`
+2. If a command template (`templates/commands/*.md`) or workflow doc changed,
+   update the corresponding skill body and bump the `commit` field in its
+   `metadata.sources`.
+3. If the `scripts/bash/*.sh` contract changed (new flags, new JSON output
+   fields, renamed scripts), update `speckit-artifact-script-contract` first —
+   then review every agent whose AGENTS.md references that skill.
+4. If the Spec-Kit phase sequence itself changed (new command, renamed command),
+   update `spec-flow` and `resume-detect`, then verify the pipeline table in
+   this company's README.
+
+The company does **not** auto-pull updates. Pinned commits are intentional —
+they prevent silent breakage from upstream changes. Pin explicitly, update
+deliberately.
+
