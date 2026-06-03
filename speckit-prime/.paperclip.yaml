@@ -1,0 +1,12 @@
+schema: paperclip/v1
+# Runtime-agnostic by design: no adapter is pinned, so this company runs on any
+# Spec-Kit-compatible agent runtime (Claude Code, KiloCode, Cursor, Copilot,
+# Gemini CLI, …). Paperclip uses its default adapter unless the importer
+# overrides it.
+agents:
+  implementation-engineer:
+    inputs:
+      env:
+        GH_TOKEN:
+          kind: secret
+          requirement: optional
