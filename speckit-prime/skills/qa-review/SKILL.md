@@ -1,84 +1,56 @@
 ---
 name: qa-review
 description: >
-  The bounded QA/review→refine loop that runs after speckit.implement. Reviews
-  each implemented slice against the spec and the up-front checklists,
-  classifies every defect (implementation / slice / spec-plan), routes it to
-  the right owner, and re-reviews — with a hard per-slice iteration budget so it
-  converges instead of spinning. Escalates unconvergeable slices to the
-  orchestrator. Use after each slice is implemented.
-metadata:
-  sources:
-    - kind: github-file
-      repo: github/spec-kit
-      path: templates/commands/analyze.md
-      url: https://github.com/github/spec-kit/blob/main/templates/commands/analyze.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
-    - kind: github-file
-      repo: github/spec-kit
-      path: docs/reference/workflows.md
-      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
+  Post-implementation QA pass for each completed slice. Review implemented code
+  against the spec and checklists. Classify every finding by earliest affected
+  phase. Loop is bounded — escalate if a slice cannot converge. Owned by the QA
+  Reviewer.
 ---
 
-# qa-review — review, refine, converge
+# QA Review — Slice Review Loop
 
-This is the loop that turns "Spec-Kit ran" into "the thing is actually right." It reviews each implemented slice and drives fixes back through the pipeline — but bounded, so an autonomous run can't get stuck.
+Use this skill after each implemented slice to verify it meets the spec and checklist before marking it done.
 
-## What you review against
+## Trigger
 
-Two fixed references, never vibes:
+The Implementation Engineer hands you a completed slice (branch, commit, or diff).
 
-1. **The spec** (`spec.md`) — does the slice deliver the requirement it traces to?
-2. **The checklists** (`checklists/*`, from phase 3) — does it pass the quality gates established up front?
+## What you do
 
-Plus the project constitution as the always-on backstop.
+1. Load the active feature's `spec.md`, `checklists/`, and `tasks.md` from the feature directory.
+2. Review the implemented slice against:
+   - Every acceptance criterion from the relevant task entry in `tasks.md`
+   - Every applicable checklist item in `checklists/`
+   - The corresponding requirement in `spec.md`
+3. Classify every finding by the earliest phase that must change:
+   - **Implementation defect** — the code is wrong or incomplete -> back to the Implementation Engineer
+   - **Slice too large or wrong boundary** -> back to the Task Slicer to re-slice
+   - **Spec or plan defect** -> up through the CTO to the right owner
+4. Emit a verdict: **PASS** or **FAIL + classified findings**.
 
-## The loop
+## Pass criteria
 
-For each implemented slice:
+A slice passes when:
+- All acceptance criteria from the task entry are satisfied
+- No checklist items applicable to this slice are failing
+- No spec requirement covered by this slice is violated
+- The build and tests are green
+
+## Fail output format
 
 ```
-review slice ── pass ──▶ close slice
-     │
-   fail
-     │
-  classify defect ──▶ route to owner ──▶ owner fixes ──▶ re-review
-     │                                                      │
-     └──────────────── iteration budget ◀───────────────────┘
+SLICE REVIEW: FAIL
+Slice: <task-id> — <task-title>
+
+Findings:
+[IMPL]  <file>:<line> — <specific defect> — fix: <what to change>
+[SLICE] <task-id> — slice boundary issue — re-slice needed: <reason>
+[SPEC]  <spec section> — spec defect — route to: <owner>
+
+Earliest affected phase: <implement | tasks | plan | spec>
+Downstream commands needing rerun: <list or none>
 ```
 
-### Classify every defect
+## Loop bound
 
-| Class | Meaning | Routes to |
-|-------|---------|-----------|
-| **Implementation** | code is wrong/incomplete but the slice is right | Implementation Engineer (re-implement) |
-| **Slice** | the slice is oversized, mis-scoped, or not vertical | Task Slicer (re-slice via `refine-slices`) |
-| **Spec / plan** | the requirement or design itself is wrong/missing | up through the CTO to the Spec Analyst or Solution Architect |
-
-A spec/plan defect is the expensive one — catching it here still beats shipping it. Route it back to the owning phase, let it re-flow forward, don't patch around it in code.
-
-## The bound — this is what makes it safe
-
-- **Default budget: 3 review iterations per slice.**
-- Each failed review spends one iteration.
-- When the budget is exhausted and the slice still fails, **stop**. Do not re-review again. Escalate the slice to the CTO (→ CEO) with the full failure history: what failed, what was tried, the suspected root cause, and a recommendation.
-- Escalation is a clean stop, not a crash. The rest of the run's independent slices continue.
-
-This bound is deliberate: an unbounded review→refine loop is the classic way an autonomous pipeline burns budget forever. Converge or escalate.
-
-## Verdict per slice
-
-- **Pass** — meets the spec and its checklist; close it.
-- **Fail (classified, routed)** — defect class + owner + concrete reproduction/criterion.
-- **Escalated** — budget spent; handed up with history.
-
-## Done
-
-The phase is done when every slice is Pass or Escalated. Escalated slices become material questions for the human (via the CEO). A run with zero escalations completed fully autonomously — the goal.
+If the same slice fails review more than 3 times, stop the loop and escalate to the CTO with a summary of all iterations. Do not spin indefinitely.

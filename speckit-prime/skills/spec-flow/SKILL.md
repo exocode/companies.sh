@@ -1,164 +1,51 @@
 ---
 name: spec-flow
 description: >
-  Autonomous orchestration of the full Spec-Kit pipeline in canonical order
-  (constitution → specify → clarify → checklist → plan → tasks → analyze →
-  implement), augmented with a vertical-slice refinement pass and a bounded
-  QA/review→refine loop. Resumes from existing artifacts instead of restarting.
-  Runs without human intervention; escalates to a human only on material
-  ambiguity, and only through the orchestrator. Runtime-agnostic — works with
-  any Spec-Kit-compatible agent runtime.
-metadata:
-  sources:
-    - kind: github-file
-      repo: github/spec-kit
-      path: README.md
-      url: https://github.com/github/spec-kit/blob/main/README.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
-    - kind: github-file
-      repo: github/spec-kit
-      path: docs/reference/workflows.md
-      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
-    - kind: github-file
-      repo: github/spec-kit
-      path: spec-driven.md
-      url: https://github.com/github/spec-kit/blob/main/spec-driven.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
+  Full pipeline orchestration map for the CEO. Defines the canonical phase
+  order, which agent owns each phase, and what artifact must land before
+  advancing. The CEO drives this flow and never executes specialist work
+  directly.
 ---
 
-# spec-flow — autonomous Spec-Kit pipeline
+# Spec Flow — Pipeline Orchestration Map
 
-This is the orchestrator's playbook. It runs the Spec-Kit sequence end-to-end for an external runner (Paperclip, RunFusion Fusion, or similar) and only stops to ask a human when it genuinely must.
+This skill defines the canonical pipeline the CEO drives. Each phase has exactly one owner. The CEO dispatches, verifies the artifact, then advances. The CEO never executes the work.
 
-## Non-negotiables
-
-1. **Canonical order is sacred.** The eight Spec-Kit phases run in this order and are never reordered or skipped:
-   `constitution → specify → clarify → checklist → plan → tasks → analyze → implement`.
-   The agency *inserts* two augmentations (slice refinement, QA loop) but never *removes* or *reorders* a Spec-Kit phase.
-2. **Autonomy is the default.** A question to the human is the exception, raised only by `clarify-gate` and only by the orchestrator (CEO).
-3. **Never restart needlessly.** Always begin with `resume-detect` and resume from the earliest incomplete phase.
-
-## The augmented pipeline
+## Pipeline Order
 
 ```
-            resume-detect            ← decide where to start
-                  │
-  ┌───────────────┴───────────────────────────────────────────────┐
-  │  0. constitution   (CEO · speckit-constitution)                │
-  │  1. specify        (Spec Analyst · speckit-specify)            │
-  │  2. clarify        (Spec Analyst · speckit-clarify)           │
-  │  3. checklist      (QA Reviewer · speckit-checklist)          │
-  │  4. plan           (Solution Architect · speckit-plan)        │
-  │  5. tasks          (Task Slicer · speckit-tasks)              │
-  │  5a. refine-slices (Task Slicer · refine-slices)      ← NEW   │
-  │  6. analyze        (QA Reviewer · speckit-analyze)           │
-  │  7. implement      (Impl. Engineer · speckit-implement)      │
-  │  7a. qa-review     (QA Reviewer · qa-review)          ← NEW   │
-  │        └─ on failure → re-slice (5a) or re-implement (7), bounded │
-  └───────────────────────────────────────────────────────────────┘
+Phase 0  constitution   -> CEO dispatches to: self (CEO uses /speckit.constitution)
+Phase 1  specify        -> CEO dispatches to: Spec Analyst
+Phase 2  clarify        -> CEO dispatches to: Spec Analyst
+Phase 3  checklist      -> CEO dispatches to: CTO -> QA Reviewer
+Phase 4  plan           -> CEO dispatches to: CTO -> Solution Architect
+Phase 5  tasks          -> CEO dispatches to: CTO -> Task Slicer
+Phase 5a refine-slices  -> CEO dispatches to: CTO -> Task Slicer (immediately after tasks)
+Phase 6  analyze        -> CEO dispatches to: CTO -> QA Reviewer
+Phase 7  implement      -> CEO dispatches to: CTO -> Implementation Engineer (slice by slice)
+Phase 7a qa-review loop -> CEO dispatches to: CTO -> QA Reviewer (after each slice)
 ```
 
-`5a` and `7a` are the agency's additions. They slot *between* canonical phases — they do not replace any.
+## Advancement rule
 
-## Phase ownership
+Before advancing to the next phase, the CEO verifies the expected artifact exists and is coherent:
 
-| # | Phase | Owner agent | Skill | Output artifact |
-|---|-------|-------------|-------|-----------------|
-| 0 | constitution | CEO | `speckit-constitution` | constitution (project memory) |
-| 1 | specify | Spec Analyst | `speckit-specify` | `spec.md` |
-| 2 | clarify | Spec Analyst | `speckit-clarify` | clarified `spec.md` |
-| 3 | checklist | QA Reviewer | `speckit-checklist` | `checklists/*` |
-| 4 | plan | Solution Architect | `speckit-plan` | `plan.md` (+ design artifacts) |
-| 5 | tasks | Task Slicer | `speckit-tasks` | `tasks.md` |
-| 5a | refine-slices | Task Slicer | `refine-slices` | refined `tasks.md` (small slices) |
-| 6 | analyze | QA Reviewer | `speckit-analyze` | consistency report |
-| 7 | implement | Implementation Engineer | `speckit-implement` | code |
-| 7a | qa-review | QA Reviewer | `qa-review` | per-slice verdicts |
+| Phase completed  | Artifact to verify                              |
+|------------------|-------------------------------------------------|
+| constitution     | `.specify/memory/constitution.md`               |
+| specify          | `specs/<feature-id>/spec.md`                    |
+| clarify          | `spec.md` has no open `[NEEDS CLARIFICATION]`   |
+| checklist        | `specs/<feature-id>/checklists/` files exist    |
+| plan             | `specs/<feature-id>/plan.md`                    |
+| tasks            | `specs/<feature-id>/tasks.md`                   |
+| refine-slices    | all tasks in `tasks.md` are small vertical slices |
+| analyze          | consistency report with no blocking findings    |
+| implement        | each slice passes QA review                     |
 
-## Spec-Kit mechanics — don't bypass them
+## CEO rules
 
-The eight phases are invoked as the Spec-Kit slash commands your runtime exposes (`/speckit.specify`, …). Those commands run Spec-Kit's own helper **scripts** (`create-new-feature.sh`, `setup-plan.sh`, `setup-tasks.sh`, `check-prerequisites.sh`, `common.sh`) and own the project structure. The agency rides on top of this — it never reimplements it:
-
-- **Feature directories are script-owned.** Spec-Kit creates `specs/NNN-shortname/` with a sequential 3-digit number and (optionally, via a `before_specify` hook) a git branch. Agents never hand-create folders, pick the number, or branch manually — `specify` does it.
-- **Locate the feature via `.specify/feature.json`.** Its `feature_directory` is the resolved path that every downstream phase (`plan`, `tasks`, `implement`, …) reads — *not* the git branch name. `resume-detect` resolves it; pass that `FEATURE_DIR` to each owner.
-- **Commands return JSON; trust it.** e.g. `plan` runs `setup-plan.sh --json` and yields `FEATURE_SPEC`, `IMPL_PLAN`, `SPECS_DIR`, `BRANCH`. Parse the command's output to find artifact paths rather than guessing.
-- **Templates and config are Spec-Kit's.** Specs/plans/tasks are seeded from `.specify/templates/*`; numbering from `.specify/init-options.json`; extension hooks from `.specify/extensions.yml`. Respect all three; don't override them.
-- **Precondition:** if `.specify/` is missing, the project isn't initialized — `resume-detect` escalates that as material (init must run first).
-
-The augmentations (`refine-slices`, `qa-review`) operate on the artifacts these scripts produce — they edit `tasks.md` in place and review the implemented slices; they do not replace any script or command.
-
-## How the orchestrator runs it
-
-For each phase, in order:
-
-1. **Skip if already satisfied.** Use `resume-detect`'s verdict — if the phase's artifact exists, is non-empty, and is not stale relative to its upstream, skip to the next phase.
-2. **Dispatch to the owner.** Hand the owner the explicit inputs (the upstream artifact paths) and the constitution. Do not have one agent do another's phase.
-3. **Verify the artifact landed** before advancing. A missing or empty artifact is a failed phase, not a reason to silently continue.
-4. **Collect routed uncertainties.** Specialists route material ambiguities up to you, never to the user. Hold them; apply `clarify-gate`.
-5. **Advance.**
-
-## The QA/review→refine loop (7a)
-
-After `implement`, every slice goes through `qa-review`. On failure, the QA Reviewer classifies and the orchestrator routes back:
-
-- implementation defect → re-implement (phase 7) for that slice
-- oversized/wrong slice → re-slice (phase 5a) for that slice
-- spec/plan defect → back to the owning phase (1/2/4), then forward again
-
-**The loop is bounded.** Default budget: **3 iterations per slice**. If a slice still fails after the budget is spent, stop looping and escalate that slice to the human via the CEO with the failure history. This is what keeps the loop from spinning forever (anti-pattern: an unbounded refine loop).
-
-## The human-escalation gate
-
-You ask the human only when `clarify-gate` returns **material**. When you do:
-
-- Batch all open material questions into one round — never drip-feed.
-- For each, state your recommended default and what changes based on the answer.
-- Everything mechanical is decided silently with a documented assumption.
-
-If nothing is material, the run completes with **zero** human interaction. That is the success case for an autonomous runner.
-
-## Done
-
-The run is done when phase 7a reports every slice passing review against its checklist, with no open material questions. Report the artifact set and the implemented, reviewed code back to the runner.
-
-## Notes for adaptation
-
-- **Presets.** This pipeline keys off Spec-Kit's standard artifacts, so a future Spec-Kit *preset* (a bundled constitution + plan defaults) can be layered by seeding the constitution and plan phases without changing the orchestration. See `presets/README.md`.
-- **Runtime-agnostic.** Phases are invoked as the Spec-Kit slash commands your runtime exposes (`/speckit.specify`, …). Nothing here assumes a specific agent runtime; swap Claude Code, KiloCode, Cursor, Copilot, or Gemini CLI freely.
-
-## Keeping up with Spec-Kit upstream changes
-
-All per-phase skills in this company (`speckit-constitution`, `speckit-specify`,
-`speckit-clarify`, `speckit-checklist`, `speckit-plan`, `speckit-tasks`,
-`speckit-analyze`, `speckit-implement`, plus `speckit-artifact-script-contract`)
-cite a **pinned commit** (`ed10b32014431a15c4e54e4ed7c92452230dd193`) from
-[github/spec-kit](https://github.com/github/spec-kit) in their `metadata.sources`.
-
-When Spec-Kit releases updates:
-
-1. Check the upstream diff for the pinned files:
-   `https://github.com/github/spec-kit/compare/<pinned-commit>...main`
-2. If a command template (`templates/commands/*.md`) or workflow doc changed,
-   update the corresponding skill body and bump the `commit` field in its
-   `metadata.sources`.
-3. If the `scripts/bash/*.sh` contract changed (new flags, new JSON output
-   fields, renamed scripts), update `speckit-artifact-script-contract` first —
-   then review every agent whose AGENTS.md references that skill.
-4. If the Spec-Kit phase sequence itself changed (new command, renamed command),
-   update `spec-flow` and `resume-detect`, then verify the pipeline table in
-   this company's README.
-
-The company does **not** auto-pull updates. Pinned commits are intentional —
-they prevent silent breakage from upstream changes. Pin explicitly, update
-deliberately.
-
+- NEVER write spec.md, plan.md, tasks.md, or code directly
+- NEVER call /speckit.specify, /speckit.plan, /speckit.implement yourself — dispatch
+- ALWAYS run resume-detect first to find the entry phase
+- ALWAYS batch human questions — never interrupt for mechanical choices
+- IF a specialist is stuck, accept the blocker, make a documented assumption, or surface to the human

@@ -1,4 +1,6 @@
 .DS_Store
+.hermes/
+.mcp.json
 .claude/*
 !.claude/skills/
 .claude/skills/*

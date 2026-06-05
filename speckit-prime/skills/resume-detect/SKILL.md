@@ -1,74 +1,49 @@
 ---
 name: resume-detect
 description: >
-  Detect the correct entry point into the Spec-Kit pipeline by scanning the
-  working directory for existing artifacts (constitution, spec.md, plan.md,
-  tasks.md, checklists, analyze report) and unresolved [NEEDS CLARIFICATION]
-  markers. Returns the earliest incomplete phase so a run resumes instead of
-  restarting from scratch. Use at the start of every spec-flow run.
-metadata:
-  sources:
-    - kind: github-file
-      repo: github/spec-kit
-      path: docs/reference/workflows.md
-      url: https://github.com/github/spec-kit/blob/main/docs/reference/workflows.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
-    - kind: github-file
-      repo: github/spec-kit
-      path: README.md
-      url: https://github.com/github/spec-kit/blob/main/README.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
+  Pre-flight scan — always the first step. Detect which Spec-Kit artifacts
+  already exist, resolve the active feature directory, and return the earliest
+  incomplete phase so the pipeline resumes correctly instead of restarting.
 ---
 
-# resume-detect — find where to start
+# Resume Detect — Pre-Flight Scan
 
-An autonomous run must never blow away good work. Before phase 0, scan the working tree and decide the earliest phase whose output is missing or stale. Everything before that point is skipped.
+Always run this skill first, before any other pipeline phase. It prevents restarting work that already exists.
 
-## Spec-Kit owns the structure — don't reinvent it
+## What you do
 
-Spec-Kit manages features in **numbered directories** under `specs/` (e.g. `specs/003-user-auth/`), and its slash commands run helper **scripts** (`create-new-feature.sh`, `setup-plan.sh`, `setup-tasks.sh`, `check-prerequisites.sh`, `common.sh`) that own folder creation, the `NNN` numbering, and optional git branches. Agents in this company **never** hand-create feature folders, invent the number, or create branches themselves — they invoke the commands and let the scripts do it. resume-detect only *reads* this structure.
+1. **Resolve FEATURE_DIR** in this order:
+   - Explicit `SPECIFY_FEATURE_DIRECTORY` env or argument
+   - `.specify/feature.json` -> `feature_directory` field
+   - Run `.specify/scripts/bash/check-prerequisites.sh --json` if it exists
+   - Scan `specs/` for directories matching `NNN-*` or timestamp pattern, pick the highest-numbered one
+   - If ambiguous, ask the CEO (who asks the human)
 
-### How to locate the active feature directory
+2. **Scan for existing artifacts** in `FEATURE_DIR`:
+   - `.specify/memory/constitution.md` -> constitution done
+   - `spec.md` -> specify done
+   - `spec.md` with no `[NEEDS CLARIFICATION]` markers -> clarify done
+   - `checklists/` directory with files -> checklist done
+   - `plan.md` -> plan done
+   - `tasks.md` -> tasks done
+   - `tasks.md` with all tasks as small vertical slices -> refine-slices done
+   - analyze output or no blocking findings -> analyze done
+   - implementation evidence (commits, test results) -> implement in progress or done
 
-1. **Read `.specify/feature.json`** → its `feature_directory` value is the resolved path (e.g. `specs/003-user-auth`). This is the source of truth; downstream phases rely on it, **not** on the git branch name. Use it.
-2. If `feature.json` is absent (no feature created yet) but the runner is targeting an existing feature, fall back to the highest-numbered `specs/NNN-*` directory, or resolve from the runner's task context.
-3. If `specs/` has several features and the target is ambiguous, that is a **material** question → route through `clarify-gate` to the human.
+3. **Return a resume ledger**:
+```
+FEATURE_DIR: <resolved path>
+ENTRY_PHASE: <0-7a>
+EXISTING_ARTIFACTS: <list>
+STALE_WARNINGS: <list of any artifacts that may be out of sync>
+NEXT_ACTION: <what the CEO should dispatch next>
+```
 
-### Precondition: Spec-Kit must be initialized
+## Stale artifact detection
 
-If `.specify/` does not exist (no `scripts/`, `templates/`, `memory/`), the project is not Spec-Kit-initialized. Do not fake it — running `specify init …` (or confirming which runtime/agent flavor to init for) is a **material** prerequisite; surface it via `clarify-gate`. Numbering config lives in `.specify/init-options.json`; extension hooks in `.specify/extensions.yml` — respect both, don't override them.
+Flag an artifact as potentially stale if:
+- `plan.md` is older than `spec.md` (spec was updated after planning)
+- `tasks.md` is older than `plan.md`
+- Implementation is ahead of the analyze pass
 
-## What to scan
-
-Match by filename within the resolved feature directory (paths vary slightly across Spec-Kit versions — `FEATURE_DIR` below = the `feature_directory` from `.specify/feature.json`):
-
-| Phase | Artifact | Present-and-valid means… |
-|-------|----------|--------------------------|
-| — init | `.specify/` (scripts, templates, memory) | absent → Spec-Kit not initialized; escalate (see above) |
-| 0 constitution | `.specify/memory/constitution.md` | exists and non-empty → skip phase 0, but **load** it |
-| 1 specify | `FEATURE_DIR/spec.md` | exists and non-empty → skip phase 1 |
-| 2 clarify | `FEATURE_DIR/spec.md` has **no** `[NEEDS CLARIFICATION]` markers | no open markers → skip phase 2 |
-| 3 checklist | `FEATURE_DIR/checklists/` populated | gates exist → skip phase 3 |
-| 4 plan | `FEATURE_DIR/plan.md` (+ `research.md`, `data-model.md`, `contracts/`) | plan exists and non-empty → skip phase 4 |
-| 5 tasks | `FEATURE_DIR/tasks.md` | tasks exist → skip phase 5 |
-| 5a refine | `tasks.md` slices already small (no coarse/`and`-joined tasks) | already refined → skip phase 5a |
-| 6 analyze | a consistency report exists and is newer than spec/plan/tasks | up-to-date → skip phase 6 |
-| 7 implement | tasks marked done + code present for them | all slices done → run is complete |
-
-## Decision rules
-
-1. **Resume from the earliest incomplete phase**, not the latest complete one. If `plan.md` exists but `spec.md` has open `[NEEDS CLARIFICATION]` markers, resume at clarify (2) — a stale downstream artifact does not let you skip a broken upstream one.
-2. **Staleness beats existence.** If an artifact is older than the upstream it depends on (e.g. `tasks.md` predates the latest `plan.md` edit), treat it as missing and re-run that phase. Note the re-run reason.
-3. **Always load the constitution** even when skipping phase 0 — every later phase is held to it.
-4. **Unresolved markers force clarify.** Any `[NEEDS CLARIFICATION]` (or equivalent Spec-Kit marker) anywhere in the spec means phase 2 is not done, regardless of what exists downstream.
-5. **Multiple features.** Resolve the target feature from `.specify/feature.json` first (rule above); only fall back to task context, and escalate if still ambiguous.
-
-## Output
-
-A single verdict consumed by `spec-flow`: the resolved `FEATURE_DIR`, the entry phase (e.g. "resume at 4 (plan); constitution + spec + clarify + checklist present and current"), and any re-run reasons.
+Do not automatically discard stale artifacts — report them and let the CEO decide whether to rerun the affected phase.

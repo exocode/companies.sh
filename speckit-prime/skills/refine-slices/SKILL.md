@@ -1,64 +1,43 @@
 ---
 name: refine-slices
 description: >
-  Refinement pass that runs after speckit.tasks. Decomposes broad, multi-step
-  tasks into the smallest independently implementable, testable, and reversible
-  vertical slices — without reordering the plan or dropping Spec-Kit's
-  dependency and parallelization markers. Use whenever tasks.md is too coarse
-  for tight implement→review cycles.
-metadata:
-  sources:
-    - kind: github-file
-      repo: github/spec-kit
-      path: templates/commands/tasks.md
-      url: https://github.com/github/spec-kit/blob/main/templates/commands/tasks.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
-    - kind: github-file
-      repo: github/spec-kit
-      path: spec-driven.md
-      url: https://github.com/github/spec-kit/blob/main/spec-driven.md
-      commit: ed10b32014431a15c4e54e4ed7c92452230dd193
-      attribution: GitHub
-      license: MIT
-      usage: referenced
+  Slice refinement pass. Decompose every task that is too broad into the
+  smallest vertical slice that is independently implementable, testable, and
+  reversible. Run immediately after /speckit.tasks. Owned by the Task Slicer
+  and CTO.
 ---
 
-# refine-slices — make the slices small
+# Refine Slices
 
-Spec-Kit's `tasks` output is correct but frequently too coarse: a single task may bundle several layers and several outcomes. Coarse tasks produce large diffs that are hard to implement cleanly, hard to review, and hard to reverse. This pass cuts them down.
+Use this skill immediately after `/speckit.tasks` generates `tasks.md`, and whenever a QA review routes a slice back for re-slicing.
 
-## The target: a vertical slice
+## What a good slice looks like
 
-A good slice is:
+- One coherent change with a single observable outcome
+- Independently implementable (no hidden dependencies on unbuilt work)
+- Independently testable (has a clear done-condition that can be verified)
+- Independently reversible (can be rolled back without breaking other slices)
+- If the task goal contains the word "and" -> split it
+- If the task touches many layers (data model + API + UI + tests) without a single observable outcome -> split it
+- Target: an implementation agent can build it and a reviewer can review it in one tight pass
 
-- **Vertical** — it delivers one observable outcome end-to-end (the thin slice through the layers it needs), not a horizontal "do all the database work" chunk.
-- **Independently implementable** — buildable on its own, given its declared dependencies.
-- **Independently testable** — it has a single, explicit done-condition you can check.
-- **Independently reversible** — small enough to back out as one coherent change.
+## Refinement process
 
-## Split heuristics
+1. Read `tasks.md` and identify every task that violates the slice criteria above.
+2. For each over-broad task, decompose it into the smallest set of vertical slices that together achieve the original goal.
+3. Assign each new slice:
+   - A clear done-condition (testable boundary)
+   - Explicit prerequisites (which slices must be done first)
+   - Parallel-safe marker if it can run concurrently with other slices
+   - File or module scope when known
+4. Preserve the original task IDs as parent references. New slices get IDs like `<parent-id>.1`, `<parent-id>.2`.
+5. Preserve Spec-Kit's task ordering and dependency chain — you are subdividing, not reordering.
+6. Keep each refined slice traceable to its parent task and to the spec requirement it serves.
 
-Split a task when any of these is true:
+## What you produce
 
-1. **The "and" test.** Its goal contains "and" joining two outcomes → split into one slice per outcome.
-2. **Multi-layer, no single outcome.** It touches several layers (UI + API + DB) without one observable result → split until each slice has one observable result.
-3. **No crisp done-condition.** You can't write a one-line "done when…" → it's too big or too vague; split or sharpen.
-4. **Reviewer can't hold it in one pass.** If the QA Reviewer couldn't review it against the checklist in a single tight pass, split it.
-5. **Mixed reversibility.** A reversible change bundled with an irreversible one → separate them so the risky part is isolated and gated.
-
-## What you must preserve
-
-- **Order and dependencies.** You are subdividing tasks, not re-planning. Keep Spec-Kit's sequencing and dependency edges; a child slice inherits its parent's dependencies and adds intra-parent ordering.
-- **Parallelization markers.** Keep Spec-Kit's parallel/independent markers; propagate them to the slices that are still genuinely parallel.
-- **Traceability.** Every slice links to its parent task and to the spec requirement it serves. No orphan slices, no scope added that isn't in the plan.
-
-## Output
-
-A rewritten `tasks.md` where each item is a small vertical slice with: an explicit done-condition, a dependency link, a parent-task link, and a requirement link. Sized so one implement→review cycle handles it cleanly.
-
-## Don't over-split
-
-A slice that is already small, single-outcome, and crisply done-conditioned is left alone. The goal is reviewable and reversible, not atomic-to-the-point-of-bureaucracy. Splitting a 5-minute task into five 1-minute tasks adds coordination cost without benefit — stop when each slice passes the heuristics above.
+A refined `tasks.md` where every item is a small vertical slice with:
+- An explicit done-condition
+- A dependency link to prerequisites
+- A parent-task reference for traceability
+- Parallel-safe or sequential marker
