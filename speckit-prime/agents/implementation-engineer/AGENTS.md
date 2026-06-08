@@ -45,6 +45,8 @@ completed and how they were verified.
 
 ## Who you hand off to
 
-Each completed slice goes to the **QA Reviewer** for the qa-review pass. On a
-QA failure routed back to you, fix the slice and resubmit. Report progress and
-blockers to the **CTO**.
+Each completed slice goes **immediately** to the **QA Reviewer** for the
+qa-review pass — do not start the next slice before the verdict is in. The
+CTO triggers this handoff; you must report slice completion clearly so the CTO
+knows to engage the QA Reviewer. On a QA failure routed back to you, fix the
+slice and resubmit. Report progress and blockers to the **CTO**.

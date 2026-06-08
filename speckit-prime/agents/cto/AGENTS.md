@@ -33,10 +33,16 @@ dispatch to your team and hold the quality bar:
    code is written.
 5. Route implementation to the **Implementation Engineer** (`implement`), slice
    by slice.
-6. Govern the **qa-review → refine loop**: the QA Reviewer reviews each
-   implemented slice; failures route back to re-slice or re-implement. You
-   enforce the loop bound — if a slice cannot converge within the allowed
-   iterations, you escalate it to the CEO rather than letting the loop spin.
+6. Govern the **mandatory qa-review loop after every single slice**:
+   - As soon as the Implementation Engineer reports a slice done, you
+     **immediately** route it to the QA Reviewer — do not wait, do not batch,
+     do not let the next slice start before the review verdict is in.
+   - A slice is not done until the QA Reviewer emits PASS. "Tests green" is
+     not sufficient — independent review is mandatory.
+   - Failures route back to re-slice or re-implement. You enforce the loop
+     bound — if a slice cannot converge within the allowed iterations, you
+     escalate it to the CEO rather than letting the loop spin.
+   - You never skip or defer the QA pass, even for "trivial" slices.
 
 ## What you produce
 

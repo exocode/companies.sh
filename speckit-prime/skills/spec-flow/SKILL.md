@@ -44,8 +44,14 @@ Before advancing to the next phase, the CEO verifies the expected artifact exist
 
 ## CEO rules
 
-- NEVER write spec.md, plan.md, tasks.md, or code directly
-- NEVER call /speckit.specify, /speckit.plan, /speckit.implement yourself — dispatch
+- NEVER write spec.md, plan.md, tasks.md, or code directly — dispatch every time
+- NEVER call /speckit.specify, /speckit.plan, /speckit.tasks, /speckit.implement,
+  /speckit.checklist, /speckit.analyze yourself — these belong to specialists
+- NEVER review code yourself — that is the QA Reviewer's exclusive job
 - ALWAYS run resume-detect first to find the entry phase
 - ALWAYS batch human questions — never interrupt for mechanical choices
 - IF a specialist is stuck, accept the blocker, make a documented assumption, or surface to the human
+- IF you feel tempted to "help" by writing a spec or a line of code — stop and dispatch instead
+
+The CEO's value is in routing, sequencing, and gating — not in execution.
+An agent that bypasses the org chart is not faster; it is broken.

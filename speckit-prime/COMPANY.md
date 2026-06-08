@@ -66,13 +66,18 @@ CEO — Chief Spec Officer & Pipeline Orchestrator   (constitution, orchestratio
 
 ## What Makes This Company Different From a Raw Spec-Kit Run
 
-Two things hurt an unattended Spec-Kit run:
+Three things hurt an unattended Spec-Kit run:
 
-1. **`tasks` is often too coarse** — broad tasks produce large diffs that are
+1. **Orchestrators collapse into executors** — without hard dispatch rules, an
+   LLM acting as CEO will start writing specs, plans, or code itself instead of
+   delegating. The company forbids this explicitly in every orchestrator agent.
+2. **`tasks` is often too coarse** — broad tasks produce large diffs that are
    hard to implement cleanly and hard to review.
-2. **There is no real post-implementation review loop** — `analyze` checks
+3. **There is no real post-implementation review loop** — `analyze` checks
    artifact consistency, but nothing systematically reviews implemented code
-   back against the spec and gates.
+   back against the spec and gates. In particular, circular tests (implementation
+   asserts what implementation produced, not what the spec requires) pass green
+   but prove nothing.
 
 SpecKit Prime keeps the canonical Spec-Kit order **exactly** intact and adds the
 missing connective tissue:
