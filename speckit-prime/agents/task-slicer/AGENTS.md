@@ -3,6 +3,7 @@ name: Task Slicer
 title: Task Slicer & Refinement Engineer
 reportsTo: cto
 skills:
+  - speckit-paperclip-mode
   - speckit-tasks
   - refine-slices
   - speckit-artifact-script-contract

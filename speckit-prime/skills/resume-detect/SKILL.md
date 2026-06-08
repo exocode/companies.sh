@@ -15,8 +15,13 @@ Always run this skill first, before any other pipeline phase. It prevents restar
 1. **Resolve FEATURE_DIR** in this order:
    - Explicit `SPECIFY_FEATURE_DIRECTORY` env or argument
    - `.specify/feature.json` -> `feature_directory` field
+   - If in Paperclip Desktop (no shell available): scan the conversation history
+     for `PAPERCLIP ARTIFACT REPORT` blocks; the most recent one naming a
+     feature directory is the active FEATURE_DIR.
    - Run `.specify/scripts/bash/check-prerequisites.sh --json` if it exists
-   - Scan `specs/` for directories matching `NNN-*` or timestamp pattern, pick the highest-numbered one
+     and a shell is available
+   - Scan `specs/` for directories matching `NNN-*` or timestamp pattern,
+     pick the highest-numbered one
    - If ambiguous, ask the CEO (who asks the human)
 
 2. **Scan for existing artifacts** in `FEATURE_DIR`:

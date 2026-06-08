@@ -3,6 +3,7 @@ name: Solution Architect
 title: Solution Architect
 reportsTo: cto
 skills:
+  - speckit-paperclip-mode
   - speckit-plan
   - speckit-artifact-script-contract
 ---

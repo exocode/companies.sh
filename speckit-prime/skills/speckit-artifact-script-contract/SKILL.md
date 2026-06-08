@@ -72,7 +72,10 @@ When initialized scripts exist, use them or honor command-provided paths before 
 - `check-prerequisites.{sh,ps1} --json` for prerequisite validation and feature path discovery
 - `common.{sh,ps1}` as shared path-resolution logic used by the scripts
 
-Prefer the script variant appropriate to the importing environment. If no script can be executed, document the fallback and keep path resolution conservative.
+Prefer the script variant appropriate to the importing environment. If no script
+can be executed (e.g. Paperclip Desktop shell-less mode), document the fallback,
+keep path resolution conservative, and follow the `speckit-paperclip-mode` skill
+for how to derive the same information from conversation context instead.
 
 ## Artifact Expectations
 

@@ -3,6 +3,7 @@ name: Spec Analyst
 title: Specification Analyst
 reportsTo: ceo
 skills:
+  - speckit-paperclip-mode
   - speckit-specify
   - speckit-clarify
   - clarify-gate

@@ -3,6 +3,7 @@ name: Implementation Engineer
 title: Implementation Engineer
 reportsTo: cto
 skills:
+  - speckit-paperclip-mode
   - speckit-implement
   - speckit-artifact-script-contract
 ---

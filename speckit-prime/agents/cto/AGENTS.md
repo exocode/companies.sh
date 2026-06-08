@@ -3,6 +3,7 @@ name: CTO
 title: Chief Technology Officer
 reportsTo: ceo
 skills:
+  - speckit-paperclip-mode
   - refine-slices
   - qa-review
 ---
