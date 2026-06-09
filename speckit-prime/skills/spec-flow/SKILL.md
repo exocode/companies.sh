@@ -14,17 +14,24 @@ This skill defines the canonical pipeline the CEO drives. Each phase has exactly
 ## Pipeline Order
 
 ```
-Phase 0  constitution   -> CEO dispatches to: self (CEO uses /speckit.constitution)
-Phase 1  specify        -> CEO dispatches to: Spec Analyst
-Phase 2  clarify        -> CEO dispatches to: Spec Analyst
-Phase 3  checklist      -> CEO dispatches to: CTO -> QA Reviewer
-Phase 4  plan           -> CEO dispatches to: CTO -> Solution Architect
-Phase 5  tasks          -> CEO dispatches to: CTO -> Task Slicer
-Phase 5a refine-slices  -> CEO dispatches to: CTO -> Task Slicer (immediately after tasks)
-Phase 6  analyze        -> CEO dispatches to: CTO -> QA Reviewer
-Phase 7  implement      -> CEO dispatches to: CTO -> Implementation Engineer (slice by slice)
-Phase 7a qa-review loop -> CEO dispatches to: CTO -> QA Reviewer (after each slice)
+Phase 0   constitution    -> CEO runs: speckit-constitution → spec-critic → [human gate if FAIL]
+Phase 1   specify         -> CEO dispatches to: Spec Analyst
+Phase 1a  clarify         -> Spec Analyst runs automatically after specify (no separate dispatch)
+Phase 1b  spec-critic     -> Spec Analyst runs autonomously after clarify
+Phase 1c  human gate      -> CEO presents SPEC ANALYST HANDBACK, waits for confirmation
+Phase 1d  spec-review     -> CEO dispatches to: Spec Reviewer (independent gate, blocks plan)
+Phase 2   checklist       -> CEO dispatches to: CTO -> QA Reviewer
+Phase 3   plan            -> CEO dispatches to: CTO -> Solution Architect
+Phase 4   tasks           -> CEO dispatches to: CTO -> Task Slicer
+Phase 4a  refine-slices   -> CTO -> Task Slicer (immediately after tasks)
+Phase 5   analyze         -> CEO dispatches to: CTO -> QA Reviewer
+Phase 6   implement       -> CEO dispatches to: CTO -> Implementation Engineer (slice by slice)
+Phase 6a  qa-review loop  -> CTO -> QA Reviewer (after each slice, mandatory)
 ```
+
+**Hard gate:** Phase 1d (spec-review) must return APPROVED or APPROVED WITH FIXES
+before Phase 2 (checklist) can start. A BLOCKED verdict routes back to the
+Spec Analyst. Planning MUST NOT start while Blocker findings are open.
 
 ## Advancement rule
 

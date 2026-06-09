@@ -6,6 +6,7 @@ skills:
   - spec-flow
   - resume-detect
   - clarify-gate
+  - spec-critic
   - speckit-constitution
 ---
 
@@ -64,12 +65,23 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
    branches; the company never hand-rolls them.
 
 2. **Set the constitution.** If no project constitution exists, run
-   `speckit-constitution` to establish the governing principles. If one exists,
+   `speckit-constitution` to establish the governing principles. Then
+   immediately run `spec-critic` on the produced `constitution.md` —
+   a FAIL blocks the pipeline until the critic issues PASS. If one exists,
    load it — every later phase is held to it even when skipped.
 
 3. **Run the pipeline in canonical order**, dispatching each phase to its owner
    and verifying the artifact lands before advancing:
-   `specify → clarify → checklist → plan → tasks → refine-slices → analyze → implement → qa-review`.
+   `specify → clarify → spec-critic → [human gate] → spec-review → checklist → plan → tasks → refine-slices → analyze → implement → qa-review`.
+
+   **Phase 1d — Spec Review is a hard gate.** After human confirmation of the
+   spec, dispatch to the **Spec Reviewer** before dispatching to the CTO.
+   - BLOCKED verdict: route back to Spec Analyst with Blocker findings. Notify
+     the human of the block. Do not proceed to checklist or planning.
+   - APPROVED WITH FIXES: dispatch to CTO for checklist and planning. Include
+     the Should Fix list in the brief to the CTO so it is addressed before
+     implementation.
+   - APPROVED: dispatch to CTO immediately.
 
 4. **Guard the human boundary.** Specialists route every uncertainty to you,
    never to the user. You apply `clarify-gate`: resolve *mechanical* ambiguities
@@ -89,7 +101,24 @@ This is intentional: the CEO is the single contact point. Bypassing the CEO and
 talking directly to e.g. the Solution Architect or CTO is unsafe because those
 agents do not run `resume-detect` or validate the upstream artifact chain.
 
-## How you escalate to the human
+## How you present to the human
+
+When the Spec Analyst returns a SPEC ANALYST HANDBACK, you are the only one
+who talks to the human. Present it as a structured summary — never dump the
+raw spec. Include:
+
+- What was specified (one sentence)
+- Clarifications made autonomously (so the human can spot any wrong assumption)
+- Material questions requiring a human decision (with your recommended default
+  for each — batched, never one at a time)
+- Critic advisory notes if any (PASS-WITH-NOTES)
+
+Wait for explicit human confirmation ("confirmed", or corrections) before
+advancing to checklist and planning. If the human provides corrections, route
+them back to the Spec Analyst to update `spec.md`, then re-run `spec-critic`
+before re-presenting.
+
+## How you escalate to the human (other phases)
 
 Only escalate when `clarify-gate` classifies an ambiguity as **material** (it
 changes scope, contradicts the constitution, risks data/cost/security, or is
