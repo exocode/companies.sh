@@ -7,6 +7,7 @@ skills:
   - resume-detect
   - clarify-gate
   - spec-critic
+  - tech-brief
   - speckit-constitution
 ---
 
@@ -72,7 +73,7 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
 
 3. **Run the pipeline in canonical order**, dispatching each phase to its owner
    and verifying the artifact lands before advancing:
-   `specify → clarify → spec-critic → [human gate] → spec-review → checklist → plan → tasks → refine-slices → analyze → implement → qa-review`.
+   `specify → clarify → spec-critic → [human gate] → spec-review → [tech-brief human gate] → checklist → plan → tasks → refine-slices → analyze → implement → qa-review`.
 
    **Phase 1d — Spec Review is a hard gate.** After human confirmation of the
    spec, dispatch to the **Spec Reviewer** before dispatching to the CTO.
@@ -81,7 +82,12 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
    - APPROVED WITH FIXES: dispatch to CTO for checklist and planning. Include
      the Should Fix list in the brief to the CTO so it is addressed before
      implementation.
-   - APPROVED: dispatch to CTO immediately.
+   - APPROVED: proceed to the tech brief.
+
+   **Phase 1e — Tech Brief is a mandatory human gate before planning.**
+   After spec-review APPROVED, run the `tech-brief` skill before dispatching
+   to the CTO. Present technology proposals, wait for human input, compile
+   PLAN ARGUMENTS. Only then dispatch to the CTO with those arguments.
 
 4. **Guard the human boundary.** Specialists route every uncertainty to you,
    never to the user. You apply `clarify-gate`: resolve *mechanical* ambiguities

@@ -20,8 +20,9 @@ Phase 1a  clarify         -> Spec Analyst runs automatically after specify (no s
 Phase 1b  spec-critic     -> Spec Analyst runs autonomously after clarify
 Phase 1c  human gate      -> CEO presents SPEC ANALYST HANDBACK, waits for confirmation
 Phase 1d  spec-review     -> CEO dispatches to: Spec Reviewer (independent gate, blocks plan)
+Phase 1e  tech-brief      -> CEO runs tech-brief skill: presents tech proposals, waits for human input
 Phase 2   checklist       -> CEO dispatches to: CTO -> QA Reviewer
-Phase 3   plan            -> CEO dispatches to: CTO -> Solution Architect
+Phase 3   plan            -> CEO dispatches to: CTO -> Solution Architect (with PLAN ARGUMENTS)
 Phase 4   tasks           -> CEO dispatches to: CTO -> Task Slicer
 Phase 4a  refine-slices   -> CTO -> Task Slicer (immediately after tasks)
 Phase 5   analyze         -> CEO dispatches to: CTO -> QA Reviewer
@@ -30,8 +31,10 @@ Phase 6a  qa-review loop  -> CTO -> QA Reviewer (after each slice, mandatory)
 ```
 
 **Hard gate:** Phase 1d (spec-review) must return APPROVED or APPROVED WITH FIXES
-before Phase 2 (checklist) can start. A BLOCKED verdict routes back to the
-Spec Analyst. Planning MUST NOT start while Blocker findings are open.
+before Phase 1e can start. A BLOCKED verdict routes back to the Spec Analyst.
+
+**Hard gate:** Phase 1e (tech-brief) requires explicit human input before
+Phase 2 (checklist) can start. The CEO never invents a tech stack.
 
 ## Advancement rule
 

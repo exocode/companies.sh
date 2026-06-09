@@ -31,7 +31,8 @@ dispatching to the owning specialist and verifying the artifact before advancing
        ▼
 ┌──────────────┐
 │ Phase 0      │  constitution  (CEO)
-│ constitution │  └─ spec-critic on constitution.md
+│ constitution │  └─ /speckit.constitution  →  constitution.md
+│              │  └─ spec-critic on constitution.md
 └──────┬───────┘  └─ [FAIL blocks pipeline until PASS]
        │ artifact: .specify/memory/constitution.md
        │ git checkpoint ①
@@ -40,43 +41,66 @@ dispatching to the owning specialist and verifying the artifact before advancing
 │ Phase 1      │  specify  (Spec Analyst)
 │ specify      │  └─ /speckit.specify  →  spec.md
 ├──────────────┤
-│ Phase 1a     │  clarify  (Spec Analyst, automatic)
+│ Phase 1a     │  clarify  (Spec Analyst, automatic — no separate dispatch)
 │ clarify      │  └─ /speckit.clarify  →  spec.md updated
 ├──────────────┤
-│ Phase 1b     │  spec-critic  (Spec Analyst, autonomous)
-│ spec-critic  │  └─ adversarial self-review
+│ Phase 1b     │  spec-critic  (Spec Analyst, autonomous self-review)
+│ spec-critic  │  └─ adversarial pass: completeness, testability,
+│              │     constitution alignment, weasel words, scope
 │              │  └─ FAIL: fix and re-run (max 3 iterations)
 └──────┬───────┘
-       │ artifact: spec.md, no [NEEDS CLARIFICATION] markers
+       │ spec.md: no [NEEDS CLARIFICATION] markers, critic PASS
        ▼
 ┌──────────────┐
-│ Phase 1c     │  ★ HUMAN GATE ★
+│ Phase 1c     │  ★ HUMAN GATE 1 — Spec Confirmation ★
 │ human gate   │  CEO presents SPEC ANALYST HANDBACK:
 │              │    • what was specified (1 sentence)
-│              │    • auto-resolved clarifications (for review)
+│              │    • auto-resolved clarifications (spot-check)
 │              │    • material questions + recommended defaults
-│              │    • critic advisory notes
+│              │    • critic advisory notes if any
 │              │  → waits for "confirmed" or corrections
 └──────┬───────┘
        │ human confirmed
        ▼
 ┌──────────────┐
-│ Phase 1d     │  spec-review  (Spec Reviewer — independent)
+│ Phase 1d     │  spec-review  (Spec Reviewer — fully independent)
 │ spec-review  │  └─ loads: spec.md + constitution + originating brief
-│  HARD GATE   │  └─ reviews 7 dimensions:
-│              │       1. Brief fidelity
+│  HARD GATE   │  └─ 7 dimensions:
+│              │       1. Brief fidelity (matches what was asked?)
 │              │       2. Constitution alignment
 │              │       3. Weasel words ("where feasible", "as appropriate"…)
-│              │       4. Testability
+│              │       4. Testability (concrete Given/When/Then + metrics)
 │              │       5. Security & ops gaps
 │              │       6. Later-feature boundary clarity
 │              │       7. Drift against prior specs
 │              │  └─ verdict: BLOCKED / APPROVED WITH FIXES / APPROVED
 └──────┬───────┘
        │         ┌─ BLOCKED ──→ Spec Analyst fixes blockers only
-       │         │              (no new human gate, max 2 rounds)
-       │         │              Round 2 still BLOCKED → CEO escalates to human
+       │         │              no new human gate, max 2 rounds
+       │         │              Round 2 still BLOCKED → CEO escalates
        │ APPROVED or APPROVED WITH FIXES
+       ▼
+┌──────────────┐
+│ Phase 1e     │  ★ HUMAN GATE 2 — Tech Brief ★
+│ tech-brief   │  CEO presents technology proposals:
+│  HARD GATE   │
+│              │   Category      │ Decision          │ Status
+│              │   ─────────────┼───────────────────┼──────────────
+│              │   Language      │ TypeScript 5.x    │ PROPOSED
+│              │   Framework     │ Next.js 14        │ PROPOSED
+│              │   Database      │ PostgreSQL        │ PROPOSED
+│              │   LLM           │ ?                 │ OPEN
+│              │   Hosting       │ Docker on-prem    │ CONSTITUTION
+│              │
+│              │  Human replies:
+│              │    "approved"              → accept all defaults
+│              │    "approved, LLM: Ollama" → override specific items
+│              │    <full spec>             → own choices for everything
+│              │
+│              │  → compiles PLAN ARGUMENTS from human response
+│              │  → Solution Architect treats these as fixed decisions
+└──────┬───────┘
+       │ PLAN ARGUMENTS confirmed
        │ git checkpoint ②
        ▼
 ┌──────────────┐
@@ -87,7 +111,9 @@ dispatching to the owning specialist and verifying the artifact before advancing
        ▼
 ┌──────────────┐
 │ Phase 3      │  plan  (Solution Architect via CTO)
-│ plan         │  └─ /speckit.plan  →  plan.md
+│ plan         │  └─ /speckit.plan <PLAN ARGUMENTS>  →  plan.md
+│              │  └─ PLAN ARGUMENTS = fixed human decisions, not suggestions
+│              │  └─ open material questions → CTO → CEO → human
 └──────┬───────┘
        │ artifact: plan.md
        ▼
@@ -96,9 +122,9 @@ dispatching to the owning specialist and verifying the artifact before advancing
 │ tasks        │  └─ /speckit.tasks  →  tasks.md
 ├──────────────┤
 │ Phase 4a     │  refine-slices  (Task Slicer, immediate)
-│ refine-slices│  └─ every task → smallest vertical slice
+│ refine-slices│  └─ every task → smallest independent vertical slice
 └──────┬───────┘
-       │ artifact: tasks.md (all slices small + independent)
+       │ artifact: tasks.md (all slices small + independently shippable)
        ▼
 ┌──────────────┐
 │ Phase 5      │  analyze  (QA Reviewer via CTO)
@@ -110,37 +136,46 @@ dispatching to the owning specialist and verifying the artifact before advancing
 ┌──────────────┐
 │ Phase 6      │  implement  (Implementation Engineer via CTO)
 │ implement    │  └─ /speckit.implement
-│  [per slice] │  └─ one vertical slice at a time
+│  [per slice] │  └─ one vertical slice at a time to its done-condition
 │              │
 │   for each   │─────────────────────────────────┐
 │    slice:    │                                  ▼
 │              │                    ┌─────────────────────────┐
 │              │                    │ Phase 6a  qa-review      │
-│              │                    │ (QA Reviewer, mandatory) │
+│              │                    │ (QA Reviewer, mandatory, │
+│              │                    │  never skipped)          │
 │              │                    │                          │
-│              │                    │ Tool discovery first:    │
+│              │                    │ Step 0: tool discovery   │
 │              │                    │  • code intelligence     │
 │              │                    │  • memory tools          │
 │              │                    │  • static analysis       │
 │              │                    │  • dup/drift detection   │
 │              │                    │                          │
+│              │                    │ Step 0b: load repo docs  │
+│              │                    │  AGENTS.md, ARCH.md,     │
+│              │                    │  CONTRIBUTING.md, ADRs,  │
+│              │                    │  monorepo contracts      │
+│              │                    │                          │
 │              │                    │ Reviews:                 │
-│              │                    │  • architecture docs     │
-│              │                    │  • convention compliance │
-│              │                    │  • duplicate detection   │
-│              │                    │  • test independence     │
-│              │                    │  • requirement coverage  │
+│              │                    │  [IMPL]  code defects    │
+│              │                    │  [ARCH]  arch violations │
+│              │                    │  [DUP]   duplicates      │
+│              │                    │  [DRIFT] interface drift │
+│              │                    │  [TEST]  circular tests  │
+│              │                    │  [COV]   missing coverage│
+│              │                    │  [DOC]   missing docs    │
 │              │                    │                          │
 │              │                    │ verdict: PASS or FAIL    │
-│              │                    └────────┬────────────────-┘
-│              │◄── fix & resubmit ──── FAIL │  (max 3 rounds)
+│              │                    │ FAIL → max 3 rounds      │
+│              │                    └────────┬─────────────────┘
+│              │◄── fix & resubmit ──── FAIL │
 │              │                        PASS │
 │              │◄───────────────────────────-┘
 │              │  git checkpoint ④ (per slice)
 └──────┬───────┘
        │ all slices PASS
        ▼
-  DONE — artifacts + implementation reviewed and committed
+  DONE — spec reviewed, tech decided by human, code reviewed slice by slice
 ```
 
 ---
@@ -241,6 +276,7 @@ They invoke Spec-Kit's own scripts and let them own the structure.
 | `clarify-gate` | company | Mechanical vs material ambiguity classifier |
 | `spec-critic` | company | Autonomous adversarial self-review of spec/constitution |
 | `spec-review` | company | Formal 7-dimension independent spec review protocol |
+| `tech-brief` | company | Human tech-stack gate before planning — produces PLAN ARGUMENTS |
 | `refine-slices` | company | Task → vertical slice decomposition |
 | `qa-review` | company | Deep bounded post-implementation review (tool-discovery driven) |
 | `speckit-paperclip-mode` | company | Shell-less fallback for Paperclip Desktop |
