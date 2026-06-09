@@ -92,5 +92,15 @@ ambiguities. No blocking critic findings. Human-ready.
 
 Hand the SPEC ANALYST HANDBACK to the **CEO**. The CEO presents it to the
 human and waits for confirmation before advancing to checklist and planning.
-If the human overrides any clarify decision, the CEO routes the correction
-back to you to update `spec.md` before the pipeline continues.
+
+**If the human provides corrections:** the CEO routes them back to you.
+Update `spec.md` to address only the corrections — do not re-run specify or
+clarify from scratch. Run `spec-critic` once on the updated spec, then
+re-submit the handback. Do NOT present to the human again — the human has
+already confirmed; you are just applying their stated corrections.
+
+**If the Spec Reviewer returns BLOCKED findings:** the CEO routes the
+Blocker list to you. Fix only the flagged items. Run `spec-critic` once.
+Re-submit to the Spec Reviewer directly via the CEO — do NOT go back to
+the human unless the CEO explicitly decides a Blocker requires a product
+decision. This is a technical correction pass, not a new review cycle.

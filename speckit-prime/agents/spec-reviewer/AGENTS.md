@@ -58,5 +58,24 @@ Nice to Have, and one of three gate verdicts:
 ## Who you hand off to
 
 Hand the SPEC REVIEW REPORT to the **CEO**. The CEO routes it:
-- BLOCKED → Spec Analyst to fix, then back to you for re-review
+- BLOCKED → Spec Analyst fixes the flagged items only, then back to you for
+  one re-review pass. The human is NOT consulted again unless the CEO
+  determines a Blocker is a product decision rather than a technical gap.
 - APPROVED / APPROVED WITH FIXES → CTO to begin planning
+
+## Loop bound — mandatory
+
+The review loop between Spec Reviewer and Spec Analyst is **bounded to
+2 rounds maximum.**
+
+- Round 1: initial review → BLOCKED → Spec Analyst fixes → re-review
+- Round 2: re-review → if still BLOCKED → stop, do not loop again
+
+If Blockers persist after round 2, stop and escalate to the CEO with:
+- The list of persistent Blockers
+- What was fixed in round 1 and why it did not resolve them
+- A recommendation: either accept the spec with known gaps documented,
+  or escalate to the human for a product decision
+
+The CEO then decides and presents to the human if needed. Never spin
+silently past round 2.
