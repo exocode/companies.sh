@@ -1,54 +1,103 @@
 ---
 name: resume-detect
 description: >
-  Pre-flight scan — always the first step. Detect which Spec-Kit artifacts
-  already exist, resolve the active feature directory, and return the earliest
+  Pre-flight scan — always the first step. Detects existing Spec-Kit artifacts,
+  active branches, in-progress slices, and aborted runs. Returns the earliest
   incomplete phase so the pipeline resumes correctly instead of restarting.
+  Prevents double-branch creation after an interrupted run.
 ---
 
 # Resume Detect — Pre-Flight Scan
 
-Always run this skill first, before any other pipeline phase. It prevents restarting work that already exists.
+Always run this skill first, before any other pipeline phase. It prevents
+restarting work that already exists and catches interrupted runs before a
+new branch or feature directory is accidentally created.
 
 ## What you do
 
-1. **Resolve FEATURE_DIR** in this order:
-   - Explicit `SPECIFY_FEATURE_DIRECTORY` env or argument
-   - `.specify/feature.json` -> `feature_directory` field
-   - If in Paperclip Desktop (no shell available): scan the conversation history
-     for `PAPERCLIP ARTIFACT REPORT` blocks; the most recent one naming a
-     feature directory is the active FEATURE_DIR.
-   - Run `.specify/scripts/bash/check-prerequisites.sh --json` if it exists
-     and a shell is available
-   - Scan `specs/` for directories matching `NNN-*` or timestamp pattern,
-     pick the highest-numbered one
-   - If ambiguous, ask the CEO (who asks the human)
+### 1. Resolve FEATURE_DIR
 
-2. **Scan for existing artifacts** in `FEATURE_DIR`:
-   - `.specify/memory/constitution.md` -> constitution done
-   - `spec.md` -> specify done
-   - `spec.md` with no `[NEEDS CLARIFICATION]` markers -> clarify done
-   - `checklists/` directory with files -> checklist done
-   - `plan.md` -> plan done
-   - `tasks.md` -> tasks done
-   - `tasks.md` with all tasks as small vertical slices -> refine-slices done
-   - analyze output or no blocking findings -> analyze done
-   - implementation evidence (commits, test results) -> implement in progress or done
+In this order (stop at first hit):
 
-3. **Return a resume ledger**:
-```
-FEATURE_DIR: <resolved path>
-ENTRY_PHASE: <0-7a>
-EXISTING_ARTIFACTS: <list>
-STALE_WARNINGS: <list of any artifacts that may be out of sync>
-NEXT_ACTION: <what the CEO should dispatch next>
-```
+1. Explicit `SPECIFY_FEATURE_DIRECTORY` env or argument.
+2. `.specify/feature.json` → `feature_directory` field.
+3. If in Paperclip Desktop (no shell): scan conversation history for
+   `PAPERCLIP ARTIFACT REPORT` blocks — most recent feature directory wins.
+4. Run `.specify/scripts/bash/check-prerequisites.sh --json` if available.
+5. Scan `specs/` for `NNN-*` or timestamp-pattern directories — pick the
+   highest-numbered one.
+6. If ambiguous (multiple candidates), ask the CEO. Never guess.
 
-## Stale artifact detection
+### 2. Detect in-progress or aborted state
+
+**This step is mandatory. Do not skip it.**
+
+Check for signs of an interrupted run before proceeding:
+
+- **Active git branch**: Does a branch matching `NNN-*` or the feature name
+  already exist (locally or on remote)? If yes, this is a resume, not a fresh
+  start. Do not create a new branch.
+- **Partial implementation**: Does `tasks.md` have some slices marked `[x]`
+  (done) and some `[ ]` (open)? The run was interrupted mid-implementation.
+  Resume from the first open slice — do not restart from task generation.
+- **Uncommitted changes**: Are there uncommitted changes in the feature
+  directory? The Implementation Engineer may have been mid-slice when the run
+  stopped. Report this to the CEO before continuing.
+- **agentmemory check**: If agentmemory is available, query key
+  `speckit/<feature-id>/run-state` for a stored ledger from a previous session.
+  A stored ledger overrides filesystem inference — it is more precise.
+
+If any in-progress signal is found:
+- Report it explicitly in the ledger under `INTERRUPTED_STATE`.
+- Set `ENTRY_PHASE` to the earliest incomplete phase, not phase 0.
+- The CEO must acknowledge the interrupted state before the pipeline proceeds.
+
+### 3. Scan for existing artifacts
+
+Check for each artifact in `FEATURE_DIR`:
+
+| Artifact | Phase done |
+|---|---|
+| `.specify/memory/constitution.md` | constitution |
+| `spec.md` | specify |
+| `spec.md` with no `[NEEDS CLARIFICATION]` markers | clarify |
+| `checklists/` directory with files | checklist |
+| `plan.md` | plan |
+| `tasks.md` | tasks |
+| all tasks in `tasks.md` are small vertical slices | refine-slices |
+| consistency report with no blocking findings | analyze |
+| some slices marked `[x]` in `tasks.md` | implement (partial) |
+| all slices marked `[x]` | implement (complete) |
+
+### 4. Stale artifact detection
 
 Flag an artifact as potentially stale if:
-- `plan.md` is older than `spec.md` (spec was updated after planning)
+
+- `plan.md` is older than `spec.md`
 - `tasks.md` is older than `plan.md`
 - Implementation is ahead of the analyze pass
+- A branch exists but `tasks.md` has no checked-off slices (branch created,
+  nothing implemented — possible abandoned run)
 
-Do not automatically discard stale artifacts — report them and let the CEO decide whether to rerun the affected phase.
+Do not discard stale artifacts automatically — report them and let the CEO
+decide whether to rerun the affected phase.
+
+### 5. Store run state in agentmemory (if available)
+
+After completing the scan, store the ledger under
+`speckit/<feature-id>/run-state` so a future session can resume without
+re-scanning. Include: FEATURE_DIR, ENTRY_PHASE, last completed slice ID,
+stale warnings, and interrupted state if any.
+
+### 6. Return the resume ledger
+
+```
+FEATURE_DIR:       <resolved path>
+ENTRY_PHASE:       <0-7a>
+EXISTING_ARTIFACTS: <list>
+STALE_WARNINGS:    <list, or none>
+INTERRUPTED_STATE: <description of in-progress signals, or none>
+ACTIVE_BRANCH:     <branch name if found, or none>
+PARTIAL_SLICES:    <list of done/open slices if mid-implementation, or none>
+NEXT_ACTION:       <what the CEO should dispatch next>
+```
