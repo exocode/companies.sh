@@ -25,6 +25,7 @@ Phase 2   checklist       -> CEO dispatches to: CTO -> QA Reviewer
 Phase 3   plan            -> CEO dispatches to: CTO -> Solution Architect (with PLAN ARGUMENTS)
 Phase 4   tasks           -> CEO dispatches to: CTO -> Task Slicer
 Phase 4a  refine-slices   -> CTO -> Task Slicer (immediately after tasks)
+Phase 4b  artifact-review -> CTO -> QA Reviewer (cross-artifact consistency, hard gate)
 Phase 5   analyze         -> CEO dispatches to: CTO -> QA Reviewer
 Phase 6   implement       -> CEO dispatches to: CTO -> Implementation Engineer (slice by slice)
 Phase 6a  qa-review loop  -> CTO -> QA Reviewer (after each slice, mandatory)
@@ -51,6 +52,7 @@ exists and is coherent:
 | plan             | `specs/<feature-id>/plan.md`                    | — |
 | tasks            | `specs/<feature-id>/tasks.md`                   | — |
 | refine-slices    | all tasks in `tasks.md` are small vertical slices | — |
+| artifact-review  | APPROVED or APPROVED WITH FIXES verdict         | — |
 | analyze          | consistency report with no blocking findings    | ③ signal commit |
 | implement/slice  | each slice passes QA review                     | ④ signal commit per slice |
 

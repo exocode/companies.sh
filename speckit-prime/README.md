@@ -127,8 +127,30 @@ dispatching to the owning specialist and verifying the artifact before advancing
        │ artifact: tasks.md (all slices small + independently shippable)
        ▼
 ┌──────────────┐
+│ Phase 4b     │  artifact-consistency-review  (QA Reviewer via CTO)
+│ artifact-    │  └─ loads ALL planning artifacts:
+│ review       │       constitution.md, spec.md, plan.md, research.md,
+│  HARD GATE   │       data-model.md, contracts/*, quickstart.md, tasks.md
+│              │  └─ 10 cross-artifact checks:
+│              │       1. Commands vs API contracts
+│              │       2. Auth requirements vs examples
+│              │       3. Local-only/no-egress claims vs setup steps
+│              │       4. Tasks vs plan structure
+│              │       5. Tasks vs success criteria
+│              │       6. Data model vs downstream contracts
+│              │       7. Quickstart scenarios vs success criteria
+│              │       8. Done-conditions are future-tense + verifiable
+│              │       9. Validation commands are executable as written
+│              │      10. Constitution compliance in ALL artifacts
+│              │  └─ verdict: BLOCKED / APPROVED WITH FIXES / APPROVED
+└──────┬───────┘
+       │         ┌─ BLOCKED ──→ fix earliest affected artifact
+       │         │              max 2 rounds, then CEO escalates
+       │ APPROVED or APPROVED WITH FIXES
+       ▼
+┌──────────────┐
 │ Phase 5      │  analyze  (QA Reviewer via CTO)
-│ analyze      │  └─ /speckit.analyze  →  consistency report
+│ analyze      │  └─ /speckit.analyze  →  consistency report (spec↔plan↔tasks)
 └──────┬───────┘
        │ artifact: no blocking findings
        │ git checkpoint ③
@@ -277,6 +299,7 @@ They invoke Spec-Kit's own scripts and let them own the structure.
 | `spec-critic` | company | Autonomous adversarial self-review of spec/constitution |
 | `spec-review` | company | Formal 7-dimension independent spec review protocol |
 | `tech-brief` | company | Human tech-stack gate before planning — produces PLAN ARGUMENTS |
+| `artifact-consistency-review` | company | Phase 4b: deep cross-artifact check (10 dimensions) before implementation |
 | `refine-slices` | company | Task → vertical slice decomposition |
 | `qa-review` | company | Deep bounded post-implementation review (tool-discovery driven) |
 | `speckit-paperclip-mode` | company | Shell-less fallback for Paperclip Desktop |

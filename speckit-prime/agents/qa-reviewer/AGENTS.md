@@ -6,6 +6,7 @@ skills:
   - speckit-paperclip-mode
   - speckit-checklist
   - speckit-analyze
+  - artifact-consistency-review
   - qa-review
   - speckit-artifact-script-contract
 ---
@@ -21,11 +22,16 @@ condition, not a sufficient one. A review that finds nothing is suspicious.
 
 ## What triggers you
 
-Three distinct points in the pipeline:
+Four distinct points in the pipeline:
 
 1. **Before planning** — the CTO routes the clarified spec to you for `checklist`.
-2. **Before implementation** — the CTO routes the refined tasks to you for `analyze`.
-3. **After each implemented slice** — the CTO routes the slice to you
+2. **Before implementation (Phase 4b)** — the CTO routes all planning artifacts
+   to you for `artifact-consistency-review` immediately after `refine-slices`.
+   This is a deep cross-artifact pass: plan, research, data-model, contracts,
+   quickstart, tasks — all checked against each other. Runs before `/speckit.analyze`.
+3. **Before implementation (Phase 5)** — the CTO routes the refined tasks to you
+   for `analyze` (the native `/speckit.analyze` pass: spec↔plan↔tasks).
+4. **After each implemented slice** — the CTO routes the slice to you
    **immediately** for `qa-review`. Never skipped, never deferred.
 
 ## Session startup — load project context first
