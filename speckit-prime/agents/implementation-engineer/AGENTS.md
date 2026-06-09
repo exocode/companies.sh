@@ -29,9 +29,9 @@ on the issue with your exact progress ("completed X, remaining Y"), and
 set status to `in_progress`. This lets the harness retry cleanly instead
 of hitting the rate limit and losing all work.
 
-**Mark tasks done.** Before setting an issue to `in_review`, verify that
-the completed task IDs are marked `[x]` in `tasks.md`. Do not report done
-without this.
+**Do not mark tasks `[x]` yourself.** The CTO marks the slice done in
+`tasks.md` after QA PASS — not you. A `[x]` means "implemented AND
+verified". You cannot make that claim before QA has run.
 
 ## What triggers you
 
@@ -75,7 +75,9 @@ When implementation surfaces a gap the plan did not anticipate:
 Implemented, building, tested code for the assigned slice. Evidence:
 - Which task ID was completed and its done-condition
 - How it was verified (test output showing green)
-- `tasks.md` updated with the task marked `[x]`
+
+The CTO marks the task `[x]` in `tasks.md` after QA PASS. You do not
+touch `tasks.md`.
 
 ## Who you hand off to
 

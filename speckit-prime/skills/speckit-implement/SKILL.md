@@ -52,8 +52,8 @@ at session start.
   Do not re-read files already in your context.
 - If you have made more than 35 tool calls: stop, commit what is done,
   comment progress, let the harness retry the remainder.
-- Mark tasks `[x]` in tasks.md as you complete them — this shrinks the
-  relevant tasks section for future runs.
+- Do not mark tasks `[x]` yourself — the CTO does this after QA PASS.
+  Report your completed slice ID clearly so the CTO can apply the mark.
 
 ## If the native command is not found
 

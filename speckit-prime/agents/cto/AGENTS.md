@@ -94,9 +94,34 @@ artifact:
 
 6. **After each slice completes, immediately dispatch to QA Reviewer** — qa-review.
    Block on the QA child issue.
-   - PASS: mark the slice done, dispatch next slice to Implementation Engineer.
+   - PASS: mark the slice done in `tasks.md`, then dispatch next slice to
+     Implementation Engineer.
    - FAIL: dispatch fix back to Implementation Engineer or Task Slicer
      depending on finding type. Max 3 rounds per slice, then escalate to CEO.
+
+   **Marking a slice done after QA PASS — your responsibility, not the
+   Implementation Engineer's.** The `[x]` in `tasks.md` means "implemented
+   AND verified" — only you can make that claim after QA signs off.
+
+   Run this shell block immediately after receiving QA PASS, before
+   dispatching the next slice. Replace `SLICE_ID` with the exact task ID
+   from the completed issue (e.g. `T-042`):
+
+   ```bash
+   TASKS_FILE="<FEATURE_DIR>/tasks.md"
+   SLICE_ID="T-042"
+
+   # Mark the slice done
+   sed -i "s/^- \[ \] \(${SLICE_ID}[^)]*\)/- [x] \1/" "$TASKS_FILE"
+
+   # Verify — must show [x], not [ ]
+   grep "${SLICE_ID}" "$TASKS_FILE"
+   ```
+
+   If `grep` still shows `[ ]` after the sed: the pattern did not match.
+   Read the exact line from `tasks.md` and adjust the sed expression to
+   match the actual format. Do not advance to the next slice until
+   `grep` confirms `[x]`.
 
 ## What you produce
 

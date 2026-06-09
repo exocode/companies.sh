@@ -74,6 +74,22 @@ deep code review that covers:
 Emit PASS or FAIL with classified findings using the tags:
 `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` `[SLICE]` `[SPEC]`
 
+**On PASS, always end your response with this exact block** so the CTO
+knows which task ID to mark `[x]` in `tasks.md`:
+
+```
+--- QA VERDICT ---
+Verdict:   PASS
+Slice ID:  <e.g. T-042>
+Issue:     <issue title>
+Evidence:  <one-line summary of what was verified>
+Action for CTO: mark T-042 [x] in tasks.md, then dispatch next slice
+--- END VERDICT ---
+```
+
+On FAIL, use the same block with `Verdict: FAIL` and list findings below it.
+The CTO must not mark any task `[x]` on a FAIL verdict.
+
 ## What you produce
 
 Up-front quality gates, a clean consistency report before build, and a deep
@@ -82,7 +98,8 @@ not when tests are green.
 
 ## Who you hand off to
 
-Passing slices close out. Failing slices route back to the Implementation
-Engineer (`[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]`) or
+Passing slices: CTO marks the task done and dispatches the next slice.
+Failing slices route back to the Implementation Engineer
+(`[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]`) or
 Task Slicer (`[SLICE]`). Unconvergeable failures and spec-level defects escalate
 through the **CTO**.
