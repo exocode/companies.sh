@@ -35,19 +35,26 @@ Spec Analyst. Planning MUST NOT start while Blocker findings are open.
 
 ## Advancement rule
 
-Before advancing to the next phase, the CEO verifies the expected artifact exists and is coherent:
+Before advancing to the next phase, the CEO verifies the expected artifact
+exists and is coherent:
 
-| Phase completed  | Artifact to verify                              |
-|------------------|-------------------------------------------------|
-| constitution     | `.specify/memory/constitution.md`               |
-| specify          | `specs/<feature-id>/spec.md`                    |
-| clarify          | `spec.md` has no open `[NEEDS CLARIFICATION]`   |
-| checklist        | `specs/<feature-id>/checklists/` files exist    |
-| plan             | `specs/<feature-id>/plan.md`                    |
-| tasks            | `specs/<feature-id>/tasks.md`                   |
-| refine-slices    | all tasks in `tasks.md` are small vertical slices |
-| analyze          | consistency report with no blocking findings    |
-| implement        | each slice passes QA review                     |
+| Phase completed  | Artifact to verify                              | Git checkpoint |
+|------------------|-------------------------------------------------|----------------|
+| constitution     | `.specify/memory/constitution.md`               | ① signal commit |
+| specify          | `specs/<feature-id>/spec.md`                    | — (not yet) |
+| clarify          | `spec.md` has no open `[NEEDS CLARIFICATION]`   | — (not yet) |
+| spec-review      | APPROVED or APPROVED WITH FIXES verdict         | ② signal commit |
+| checklist        | `specs/<feature-id>/checklists/` files exist    | — |
+| plan             | `specs/<feature-id>/plan.md`                    | — |
+| tasks            | `specs/<feature-id>/tasks.md`                   | — |
+| refine-slices    | all tasks in `tasks.md` are small vertical slices | — |
+| analyze          | consistency report with no blocking findings    | ③ signal commit |
+| implement/slice  | each slice passes QA review                     | ④ signal commit per slice |
+
+**Git checkpoint signals:** At each marked phase, the CEO emits a
+`GIT CHECKPOINT` message to the human with the exact files to stage and
+a suggested commit message. The human commits — or confirms they want the
+agent to commit. Nothing is committed automatically without this signal.
 
 ## CEO rules
 

@@ -88,6 +88,28 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
    yourself with a documented assumption; surface only *material* ambiguities to
    the human — batched, specific, and decision-ready.
 
+5. **Signal git checkpoints.** At the four defined checkpoints, emit a
+   `GIT CHECKPOINT` message before advancing to the next phase:
+
+   ```
+   GIT CHECKPOINT ①  (or ②, ③, ④-<slice-id>)
+   Files to stage:
+     <exact file paths, one per line>
+   Suggested commit message:
+     <type>(<scope>): <what was produced and why>
+   Action: commit these files, then reply "committed" to continue.
+   ```
+
+   Wait for the human to confirm before advancing. If the human wants the
+   agent to commit, they say so and you use whatever git tool is available.
+   Nothing advances past a checkpoint without the commit being acknowledged.
+
+   The four checkpoints are:
+   - ① after constitution passes spec-critic
+   - ② after spec-review returns APPROVED or APPROVED WITH FIXES
+   - ③ after analyze passes (before any code is written)
+   - ④ after each individual slice passes qa-review
+
 ## Entry-point shortcut: "I already have a spec / plan / tasks"
 
 If the runner says "we already have a spec, start from there":

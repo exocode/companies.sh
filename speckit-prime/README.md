@@ -2,157 +2,263 @@
 
 An autonomous [Agent Company](https://agentcompanies.io) built around GitHub's
 [Spec-Kit](https://github.com/github/spec-kit) Spec-Driven Development toolkit.
-Hand it a feature idea and it runs the entire Spec-Kit pipeline by itself —
-constitution, specify, clarify, checklist, plan, tasks, analyze, implement —
-adding vertical-slice refinement and a bounded QA/review→refine loop on top.
+Hand it a feature idea and it runs the full pipeline by itself — with formal
+review gates, vertical-slice refinement, and a bounded QA loop.
 
-Designed to be driven by an orchestrator (Paperclip, RunFusion Fusion, or any
-similar runner). Talks to a human **only** when it hits an ambiguity it cannot
-responsibly resolve on its own — and only through the CEO.
+> **Runtime-agnostic.** Runs on Claude Code, KiloCode, Cursor, Copilot,
+> Gemini CLI, or any agent runtime that exposes `/speckit.*` commands.
 
-> **Runtime-agnostic.** No agent runtime is pinned. Spec-Kit has many
-> implementations — this company runs on Claude Code, KiloCode, Cursor, Copilot,
-> Gemini CLI, and anything else that exposes the `/speckit.*` commands.
+---
 
-> **Merged from two independently developed versions** (speckit-workflow-lab by
-> Codex, speckit-agency by Claude) — taking the best of each.
+## Pipeline
 
-## Why it exists
-
-Spec-Kit's command sequence is excellent, but two things hurt when you run it
-unattended:
-
-1. **`tasks` is often too coarse** — broad tasks produce large diffs that are
-   hard to implement cleanly and hard to review.
-2. **There's no real post-implementation review loop** — `analyze` checks
-   artifact consistency, but nothing systematically reviews *implemented* code
-   back against the spec and gates.
-
-SpecKit Prime keeps the canonical Spec-Kit order **exactly** intact and adds the
-missing connective tissue:
-
-- **Slice refinement** (`refine-slices`) after `tasks` — cut every task into the
-  smallest independently shippable vertical slice.
-- **A bounded QA/review→refine loop** (`qa-review`) after `implement` — review
-  each slice against the spec and checklists, route defects back to the right
-  owner, converge in a fixed number of iterations or escalate.
-- **Resumability** (`resume-detect`) — start from whatever artifacts already
-  exist (constitution, spec, plan, tasks) instead of re-running from scratch.
-  Validates freshness and traceability before reuse.
-- **A disciplined human gate** (`clarify-gate`) — autonomous by default; the
-  human is interrupted only on *material* ambiguity, and only by the CEO.
-- **Spec-Kit script respect** (`speckit-artifact-script-contract`) — agents
-  never hand-create feature folders, invent NNN numbers, or create branches.
-  They invoke Spec-Kit's own scripts and let them own structure.
-
-## The pipeline
+Every run starts with `resume-detect`. The CEO then drives each phase in order,
+dispatching to the owning specialist and verifying the artifact before advancing.
 
 ```
-resume-detect → 0 constitution → 1 specify → 2 clarify → 3 checklist
-              → 4 plan → 5 tasks → 5a refine-slices → 6 analyze
-              → 7 implement → 7a qa-review ──(fail, bounded)──► re-slice / re-implement
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SPECKIT PRIME PIPELINE                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  START
+    │
+    ▼
+┌──────────────┐
+│ resume-detect│  ← always first: scans artifacts, active branch,
+│   (CEO)      │    mid-run state, agentmemory ledger
+└──────┬───────┘
+       │ resolves FEATURE_DIR + ENTRY_PHASE
+       ▼
+┌──────────────┐
+│ Phase 0      │  constitution  (CEO)
+│ constitution │  └─ spec-critic on constitution.md
+└──────┬───────┘  └─ [FAIL blocks pipeline until PASS]
+       │ artifact: .specify/memory/constitution.md
+       │ git checkpoint ①
+       ▼
+┌──────────────┐
+│ Phase 1      │  specify  (Spec Analyst)
+│ specify      │  └─ /speckit.specify  →  spec.md
+├──────────────┤
+│ Phase 1a     │  clarify  (Spec Analyst, automatic)
+│ clarify      │  └─ /speckit.clarify  →  spec.md updated
+├──────────────┤
+│ Phase 1b     │  spec-critic  (Spec Analyst, autonomous)
+│ spec-critic  │  └─ adversarial self-review
+│              │  └─ FAIL: fix and re-run (max 3 iterations)
+└──────┬───────┘
+       │ artifact: spec.md, no [NEEDS CLARIFICATION] markers
+       ▼
+┌──────────────┐
+│ Phase 1c     │  ★ HUMAN GATE ★
+│ human gate   │  CEO presents SPEC ANALYST HANDBACK:
+│              │    • what was specified (1 sentence)
+│              │    • auto-resolved clarifications (for review)
+│              │    • material questions + recommended defaults
+│              │    • critic advisory notes
+│              │  → waits for "confirmed" or corrections
+└──────┬───────┘
+       │ human confirmed
+       ▼
+┌──────────────┐
+│ Phase 1d     │  spec-review  (Spec Reviewer — independent)
+│ spec-review  │  └─ loads: spec.md + constitution + originating brief
+│  HARD GATE   │  └─ reviews 7 dimensions:
+│              │       1. Brief fidelity
+│              │       2. Constitution alignment
+│              │       3. Weasel words ("where feasible", "as appropriate"…)
+│              │       4. Testability
+│              │       5. Security & ops gaps
+│              │       6. Later-feature boundary clarity
+│              │       7. Drift against prior specs
+│              │  └─ verdict: BLOCKED / APPROVED WITH FIXES / APPROVED
+└──────┬───────┘
+       │         ┌─ BLOCKED ──→ Spec Analyst fixes blockers only
+       │         │              (no new human gate, max 2 rounds)
+       │         │              Round 2 still BLOCKED → CEO escalates to human
+       │ APPROVED or APPROVED WITH FIXES
+       │ git checkpoint ②
+       ▼
+┌──────────────┐
+│ Phase 2      │  checklist  (QA Reviewer via CTO)
+│ checklist    │  └─ /speckit.checklist  →  checklists/ files
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ Phase 3      │  plan  (Solution Architect via CTO)
+│ plan         │  └─ /speckit.plan  →  plan.md
+└──────┬───────┘
+       │ artifact: plan.md
+       ▼
+┌──────────────┐
+│ Phase 4      │  tasks  (Task Slicer via CTO)
+│ tasks        │  └─ /speckit.tasks  →  tasks.md
+├──────────────┤
+│ Phase 4a     │  refine-slices  (Task Slicer, immediate)
+│ refine-slices│  └─ every task → smallest vertical slice
+└──────┬───────┘
+       │ artifact: tasks.md (all slices small + independent)
+       ▼
+┌──────────────┐
+│ Phase 5      │  analyze  (QA Reviewer via CTO)
+│ analyze      │  └─ /speckit.analyze  →  consistency report
+└──────┬───────┘
+       │ artifact: no blocking findings
+       │ git checkpoint ③
+       ▼
+┌──────────────┐
+│ Phase 6      │  implement  (Implementation Engineer via CTO)
+│ implement    │  └─ /speckit.implement
+│  [per slice] │  └─ one vertical slice at a time
+│              │
+│   for each   │─────────────────────────────────┐
+│    slice:    │                                  ▼
+│              │                    ┌─────────────────────────┐
+│              │                    │ Phase 6a  qa-review      │
+│              │                    │ (QA Reviewer, mandatory) │
+│              │                    │                          │
+│              │                    │ Tool discovery first:    │
+│              │                    │  • code intelligence     │
+│              │                    │  • memory tools          │
+│              │                    │  • static analysis       │
+│              │                    │  • dup/drift detection   │
+│              │                    │                          │
+│              │                    │ Reviews:                 │
+│              │                    │  • architecture docs     │
+│              │                    │  • convention compliance │
+│              │                    │  • duplicate detection   │
+│              │                    │  • test independence     │
+│              │                    │  • requirement coverage  │
+│              │                    │                          │
+│              │                    │ verdict: PASS or FAIL    │
+│              │                    └────────┬────────────────-┘
+│              │◄── fix & resubmit ──── FAIL │  (max 3 rounds)
+│              │                        PASS │
+│              │◄───────────────────────────-┘
+│              │  git checkpoint ④ (per slice)
+└──────┬───────┘
+       │ all slices PASS
+       ▼
+  DONE — artifacts + implementation reviewed and committed
 ```
 
-| # | Phase | Owner | Skill |
-|---|-------|-------|-------|
-| — | resume detection | CEO | `resume-detect` |
-| 0 | constitution | CEO | `speckit-constitution` |
-| 1 | specify | Spec Analyst | `speckit-specify` |
-| 2 | clarify | Spec Analyst | `speckit-clarify` |
-| 3 | checklist | QA Reviewer (via CTO) | `speckit-checklist` |
-| 4 | plan | Solution Architect | `speckit-plan` |
-| 5 | tasks | Task Slicer | `speckit-tasks` |
-| 5a | **refine-slices** | Task Slicer | `refine-slices` |
-| 6 | analyze | QA Reviewer (via CTO) | `speckit-analyze` |
-| 7 | implement | Implementation Engineer | `speckit-implement` |
-| 7a | **qa-review → refine** | QA Reviewer | `qa-review` |
+---
 
-All agents use `speckit-artifact-script-contract` to resolve Spec-Kit's native
-paths and scripts before falling back to manual inference.
+## Git Checkpoints
 
-## Org chart
+The pipeline defines four natural commit points. The CEO signals each one
+explicitly — nothing is committed without an explicit checkpoint signal:
+
+| # | When | What to commit |
+|---|------|----------------|
+| ① | After constitution passes spec-critic | `.specify/memory/constitution.md` |
+| ② | After spec-review APPROVED | `specs/<id>/spec.md`, `checklists/` |
+| ③ | After analyze passes (before any code) | `specs/<id>/plan.md`, `tasks.md` |
+| ④ | After each slice passes qa-review | The slice's code changes only |
+
+**Why this cadence:**
+- Constitution is a project-level governance decision — commit it alone.
+- Spec is reviewed and human-confirmed — commit it before any planning begins.
+- Plan + tasks are the implementation contract — commit them before code.
+- Each passing slice is independently shippable — commit it before the next.
+
+You never end up with a giant undifferentiated diff. Each commit is traceable
+to a single pipeline phase and a single human or agent decision.
+
+---
+
+## Org Chart
 
 ```
-CEO — Chief Spec Officer & Pipeline Orchestrator   (constitution, orchestration, single human gate)
-├── Spec Analyst                                    (specify, clarify)
-└── CTO — Chief Technology Officer                  (owns the build sub-pipeline)
-    ├── Solution Architect                          (plan)
-    ├── Task Slicer                                 (tasks + refine-slices)
-    ├── Implementation Engineer                     (implement)
-    └── QA Reviewer                                 (checklist, analyze, qa-review loop)
+CEO — Chief Spec Officer & Pipeline Orchestrator
+├── Spec Analyst      (specify → clarify → spec-critic → handback)
+├── Spec Reviewer     (independent spec gate, blocks planning)
+└── CTO — Chief Technology Officer
+    ├── Solution Architect      (plan)
+    ├── Task Slicer             (tasks + refine-slices)
+    ├── Implementation Engineer (implement, slice by slice)
+    └── QA Reviewer             (checklist, analyze, qa-review loop)
 ```
 
 | Agent | Reports to | Role |
 |-------|-----------|------|
-| **CEO** | — | Sets/loads the constitution, orchestrates the whole run via `spec-flow`, and is the only agent that talks to the human. |
-| **Spec Analyst** | CEO | Turns the idea into a clarified `spec.md`. Routes material ambiguities to the CEO, defaults mechanical ones. |
-| **CTO** | CEO | Owns checklist → plan → slice → analyze → implement → QA loop. Enforces slice-refinement policy and loop bounds. |
-| **Solution Architect** | CTO | Produces `plan.md` + slice map from the clarified spec. |
-| **Task Slicer** | CTO | Generates `tasks.md` then immediately runs `refine-slices`. |
-| **Implementation Engineer** | CTO | Builds one vertical slice at a time to its done-condition. |
-| **QA Reviewer** | CTO | Runs checklist, analyze, and the qa-review→refine loop. |
-
-## Spec-Kit Artifact Structure
-
-```text
-.specify/
-|-- feature.json
-|-- memory/constitution.md
-|-- scripts/
-|   |-- bash/
-|   |   |-- check-prerequisites.sh
-|   |   |-- common.sh
-|   |   |-- create-new-feature.sh
-|   |   |-- setup-plan.sh
-|   |   `-- setup-tasks.sh
-|   `-- powershell/
-`-- templates/
-    |-- checklist-template.md
-    |-- constitution-template.md
-    |-- plan-template.md
-    |-- spec-template.md
-    `-- tasks-template.md
-
-specs/
-`-- <NNN-feature-name>/
-    |-- spec.md
-    |-- plan.md
-    |-- research.md
-    |-- data-model.md
-    |-- contracts/
-    |-- quickstart.md
-    |-- tasks.md
-    `-- checklists/
-```
-
-## Skills
-
-| Skill | Source | Purpose |
-|-------|--------|---------|
-| `spec-flow` | speckit-agency (Claude) | Master orchestration playbook |
-| `resume-detect` | speckit-agency (Claude) | Artifact scan + entry-point resolution |
-| `clarify-gate` | speckit-agency (Claude) | Mechanical vs material ambiguity classifier |
-| `refine-slices` | speckit-agency (Claude) | Task → vertical slice decomposition |
-| `qa-review` | speckit-agency (Claude) | Bounded post-implementation review loop |
-| `speckit-constitution` | speckit-agency (Claude) | Phase 0 skill |
-| `speckit-specify` | speckit-agency (Claude) | Phase 1 skill |
-| `speckit-clarify` | speckit-agency (Claude) | Phase 2 skill |
-| `speckit-checklist` | speckit-agency (Claude) | Phase 3 skill |
-| `speckit-plan` | speckit-agency (Claude) | Phase 4 skill |
-| `speckit-tasks` | speckit-agency (Claude) | Phase 5 skill |
-| `speckit-analyze` | speckit-agency (Claude) | Phase 6 skill |
-| `speckit-implement` | speckit-agency (Claude) | Phase 7 skill |
-| `speckit-artifact-script-contract` | speckit-workflow-lab (Codex) | Native path/script resolution |
-
-## Presets
-
-The `presets/` directory accepts Spec-Kit community presets that seed the
-constitution and plan phases for specific project types. Adding a preset never
-changes the pipeline order, the slice-refinement pass, the QA loop, or the
-human gate.
+| **CEO** | — | Orchestrates the full run. Only agent that talks to the human. Runs resume-detect and spec-critic on constitution. |
+| **Spec Analyst** | CEO | specify → clarify (automatic) → spec-critic (autonomous) → HANDBACK to CEO. |
+| **Spec Reviewer** | CEO | Independent formal review of spec.md. 7 dimensions. Hard gate before planning. Max 2 rounds. |
+| **CTO** | CEO | Owns checklist → plan → tasks → analyze → implement → QA loop. Enforces slice and loop bounds. |
+| **Solution Architect** | CTO | Produces `plan.md` and slice map. |
+| **Task Slicer** | CTO | `tasks.md` then immediately `refine-slices`. |
+| **Implementation Engineer** | CTO | One vertical slice at a time to its done-condition. |
+| **QA Reviewer** | CTO | checklist, analyze, qa-review after every slice. Discovers available tools first. |
 
 ---
 
-Generated from [github/spec-kit](https://github.com/github/spec-kit) and
-merged from speckit-workflow-lab (Codex) + speckit-agency (Claude).
+## Resume Safety
+
+`resume-detect` runs **before every pipeline start**. It detects:
+
+- An existing branch matching the feature name → resume, no new branch
+- `tasks.md` with mixed `[x]`/`[ ]` slices → resume at first open slice
+- Uncommitted changes in the feature directory → report before continuing
+- A stored run ledger in agentmemory → takes precedence over filesystem scan
+
+The CEO acknowledges any `INTERRUPTED_STATE` before the pipeline proceeds.
+Nothing is restarted from scratch when valid artifacts already exist.
+
+---
+
+## Spec-Kit Artifact Structure
+
+```
+.specify/
+├── feature.json
+├── memory/constitution.md
+├── scripts/bash/   (check-prerequisites.sh, setup-plan.sh, …)
+└── templates/      (spec, plan, tasks, checklist templates)
+
+specs/<NNN-feature-name>/
+├── spec.md
+├── plan.md
+├── tasks.md
+├── checklists/
+├── research.md        (if needed)
+├── data-model.md      (if needed)
+└── contracts/         (if needed)
+```
+
+Agents never hand-create feature folders or invent `NNN` numbers.
+They invoke Spec-Kit's own scripts and let them own the structure.
+
+---
+
+## Skills Reference
+
+| Skill | Type | Purpose |
+|-------|------|---------|
+| `spec-flow` | company | Master pipeline map for the CEO |
+| `resume-detect` | company | Artifact scan + mid-run state detection |
+| `clarify-gate` | company | Mechanical vs material ambiguity classifier |
+| `spec-critic` | company | Autonomous adversarial self-review of spec/constitution |
+| `spec-review` | company | Formal 7-dimension independent spec review protocol |
+| `refine-slices` | company | Task → vertical slice decomposition |
+| `qa-review` | company | Deep bounded post-implementation review (tool-discovery driven) |
+| `speckit-paperclip-mode` | company | Shell-less fallback for Paperclip Desktop |
+| `speckit-artifact-script-contract` | company | Native Spec-Kit path/script resolution |
+| `speckit-constitution` | native | Delegates to `/speckit.constitution` |
+| `speckit-specify` | native | Delegates to `/speckit.specify` |
+| `speckit-clarify` | native | Delegates to `/speckit.clarify` |
+| `speckit-checklist` | native | Delegates to `/speckit.checklist` |
+| `speckit-plan` | native | Delegates to `/speckit.plan` |
+| `speckit-tasks` | native | Delegates to `/speckit.tasks` |
+| `speckit-analyze` | native | Delegates to `/speckit.analyze` |
+| `speckit-implement` | native | Delegates to `/speckit.implement` |
+
+**Native skills** are thin wrappers — they delegate to the `/speckit.*` commands
+that Spec-Kit installs in your project. They never copy or re-implement Spec-Kit
+logic, so they stay up to date automatically when Spec-Kit releases new versions.
+
+---
+
+Generated from [github/spec-kit](https://github.com/github/spec-kit).
 Conforms to the [Agent Companies specification](https://agentcompanies.io/specification).
