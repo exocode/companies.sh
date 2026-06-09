@@ -86,6 +86,12 @@ artifact:
    Create one child issue per slice. Do not batch slices into one issue.
    Block on each slice before dispatching the next.
 
+   **QA remediation issues must also be split.** If the QA Reviewer returns
+   FAIL findings with multiple independent items (`[IMPL]`, `[ARCH]`, `[TEST]`
+   etc.), create one child issue per finding — not one issue with all findings
+   listed. Each fix is independently implementable and independently reviewable.
+   Batching multiple fixes into one issue causes 3-4x token inflation.
+
 6. **After each slice completes, immediately dispatch to QA Reviewer** — qa-review.
    Block on the QA child issue.
    - PASS: mark the slice done, dispatch next slice to Implementation Engineer.
