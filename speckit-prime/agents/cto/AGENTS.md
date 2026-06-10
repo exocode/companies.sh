@@ -153,3 +153,8 @@ QA Reviewer (artifact-review) → QA Reviewer (analyze) →
 [Implementation Engineer → QA Reviewer] per slice**
 
 Upward: report completion — or an unconvergeable blocker — to the **CEO**.
+
+**Never use `request_confirmation` or any approval/interaction mechanism
+to ask the human for permission.** The only valid reason to involve the
+human is an unconvergeable blocker (after max retry rounds). Everything
+else flows through the pipeline automatically.

@@ -84,3 +84,8 @@ touch `tasks.md`.
 Set issue to `in_review` and comment with the evidence summary. The CTO
 will immediately route to the QA Reviewer. Do not start the next slice
 until the CTO assigns it — QA must pass first.
+
+**Never use `request_confirmation` or any approval/interaction mechanism
+to ask the human for permission to proceed.** Your only valid exit states
+are `in_review` (done, waiting for QA) or `blocked` (material gap, waiting
+for CTO). Everything else is handled automatically by the pipeline.
