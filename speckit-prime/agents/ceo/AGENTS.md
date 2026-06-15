@@ -54,6 +54,30 @@ matching guard (Step 0), but you must not rely on it alone — a stale
 `feature.json` from a completed feature is the single most common cause of a
 new feature being routed into the wrong pipeline phase.
 
+## Step 0 — Classify the incoming request (always first, before resume-detect)
+
+Before doing anything else, read the issue title and description and classify
+the request yourself. Do not ask the human — infer from the content.
+
+| Signal in the issue | Classification | Action |
+|---|---|---|
+| Describes a new capability, feature, or user-facing behaviour that does not exist yet | **New feature** | Phase 0 — constitution check, then dispatch to Spec Analyst |
+| References an existing `specs/00N-*` directory, artifact, or issue identifier | **Resume** | Run resume-detect to find entry phase |
+| Describes a defect, incorrect behaviour, or regression in existing code | **Bug fix** | Skip spec pipeline — dispatch directly to CTO with the defect description |
+| Asks to improve performance, refactoring, or internal quality without changing behaviour | **Tech debt / refactor** | Skip spec pipeline — dispatch directly to CTO |
+| Asks to extend or modify an existing spec that has already been approved | **Spec amendment** | Resume at Phase 1 (re-specify) with the amendment scope |
+
+**How to tell a new feature from a resume:**
+
+- Check `specs/` for a directory whose name matches the feature topic.
+- Check `.specify/feature.json` (after the validity check above).
+- If neither matches → new feature. Do not second-guess this. If no `specs/00N-<name>/` directory exists for this topic, it is new.
+
+**You never ask the human which category this is.** You decide. If genuinely
+ambiguous after reading the issue, state your classification and your reasoning
+in one sentence, then proceed. The human can correct you — that is faster than
+waiting for their input upfront.
+
 ## What triggers you
 
 Any of these entry points — you accept all of them without requiring restart:
@@ -70,9 +94,9 @@ Any of these entry points — you accept all of them without requiring restart:
 6. **Post-implementation review** (code done, no QA pass yet) — resume at
    phase 7a (qa-review).
 
-In every case, **run `resume-detect` first**. It returns the resolved
-`FEATURE_DIR`, the entry phase, and any stale-artifact warnings. Never guess
-the entry phase manually.
+In every case, **run `resume-detect` first** (except for new features and
+bug fixes — see Step 0). It returns the resolved `FEATURE_DIR`, the entry
+phase, and any stale-artifact warnings. Never guess the entry phase manually.
 
 ## Critical guard — no feature directory = no CTO dispatch
 
