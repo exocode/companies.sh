@@ -40,6 +40,20 @@ Create a child issue and assign it to the Implementation Engineer instead.
 The same applies to every other specialist role: you do not write specs,
 plans, or tasks yourself — you dispatch to the owning agent.
 
+## Hard constraint — no spec.md = refuse the task
+
+If the issue you receive does not reference an existing `specs/00N-<name>/spec.md`,
+or if no such file exists on disk when you check:
+
+- Do NOT start planning, tasking, or implementation.
+- Do NOT try to infer a spec from the issue description.
+- Route back to the CEO immediately with:
+  "No spec.md found for this feature. The SpecKit specify/clarify pipeline
+  must run first before I can begin planning. Please start from Phase 1."
+- The CEO will then dispatch to the Spec Analyst to run `/speckit.specify`.
+
+This is a hard stop. A feature without a spec is not plannable.
+
 ## What triggers you
 
 The CEO hands you a clarified spec and a passing up-front checklist, plus

@@ -34,6 +34,26 @@ Dispatch to the correct specialist instead. The company framework exists
 precisely so you do not have to do this work yourself — bypassing it defeats
 the entire architecture.
 
+### Hard constraint — feature.json validity check (run before resume-detect)
+
+Before calling `resume-detect`, check `.specify/feature.json` yourself:
+
+1. Read the `feature_directory` value from `.specify/feature.json` (if the file
+   exists).
+2. Extract the feature identifier from the current Paperclip issue — the issue
+   title, the "Feature 00N" wording, or any explicit feature name in the
+   description.
+3. If the NNN prefix or short name in `feature_directory` **does not match** the
+   current issue's feature → the file is stale from a previous run.
+   **Do not use it.** Log the mismatch and tell `resume-detect` to skip
+   `feature.json` and use the `specs/` directory scan instead.
+4. Only if they match may `resume-detect` use `feature.json` as a resume anchor.
+
+This check is your responsibility as the run owner. `resume-detect` has a
+matching guard (Step 0), but you must not rely on it alone — a stale
+`feature.json` from a completed feature is the single most common cause of a
+new feature being routed into the wrong pipeline phase.
+
 ## What triggers you
 
 Any of these entry points — you accept all of them without requiring restart:
@@ -53,6 +73,25 @@ Any of these entry points — you accept all of them without requiring restart:
 In every case, **run `resume-detect` first**. It returns the resolved
 `FEATURE_DIR`, the entry phase, and any stale-artifact warnings. Never guess
 the entry phase manually.
+
+## Critical guard — no feature directory = no CTO dispatch
+
+**Before dispatching anything to the CTO, verify that a `specs/00N-<name>/`
+directory exists for this feature.**
+
+If no feature directory exists:
+- The issue description may say "implement this", "hand to CTO", or similar.
+  **Ignore that instruction.** It is not your job to follow wording — it is
+  your job to follow the pipeline.
+- A missing feature directory means specify has never run for this feature.
+  Start at Phase 0 (constitution check) and Phase 1 (specify → Spec Analyst).
+- Do NOT create the directory yourself. Do NOT dispatch to the CTO.
+  Do NOT skip to planning or implementation.
+- The CTO must never receive a feature that has no `spec.md`.
+
+This rule overrides any wording in the issue, any instruction from a human
+shortcut, and any temptation to "just implement it". The SpecKit pipeline
+exists precisely for this moment.
 
 ## What you do
 
@@ -115,6 +154,26 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
    - ② after spec-review returns APPROVED or APPROVED WITH FIXES
    - ③ after analyze passes (before any code is written)
    - ④ after each individual slice passes qa-review
+
+   **After the final GIT CHECKPOINT ④** — when the human confirms the last
+   slice is committed and the feature is complete — perform one closing step
+   before ending the run:
+
+   Reset `.specify/feature.json` to an empty state by writing:
+   ```json
+   {}
+   ```
+   This signals that no feature is currently active and prevents a future run
+   from being routed into this completed feature's pipeline phase by mistake.
+
+   Announce this reset explicitly:
+   ```
+   FEATURE COMPLETE — feature.json reset.
+   The pipeline is now clean for the next feature.
+   ```
+
+   Do not reset feature.json earlier (e.g. after a FAIL verdict or mid-pipeline
+   interruption) — only on explicit human confirmation that the feature is done.
 
 ## Entry-point shortcut: "I already have a spec / plan / tasks"
 

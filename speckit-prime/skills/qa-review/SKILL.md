@@ -218,7 +218,27 @@ Earliest affected phase: <implement | tasks | plan | spec>
 Downstream commands needing rerun: <list or none>
 ```
 
-### Routing
+### Pass output
+
+```
+SLICE REVIEW: PASS
+Slice: <task-id> — <task-title>
+
+TOOL INVENTORY (used this review):
+  <as above>
+
+Summary: <one sentence — what was verified and by which tools>
+```
+
+If this is the **last open slice** in `tasks.md` (all others already marked
+`[x]`), append:
+
+```
+ALL SLICES COMPLETE — route to CEO for final GIT CHECKPOINT ④ and
+feature.json reset.
+```
+
+The CEO is responsible for the reset; the QA Reviewer only signals readiness.
 
 - `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` → back to Implementation Engineer
 - `[SLICE]` → back to Task Slicer

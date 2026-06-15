@@ -15,6 +15,27 @@ new branch or feature directory is accidentally created.
 
 ## What you do
 
+### 0. Validate feature.json against the current issue (MANDATORY — run before step 1)
+
+Before reading `.specify/feature.json`, extract the feature identifier from
+the current context — the Paperclip issue title, description, or any explicit
+`FEATURE_ID` passed by the CEO.
+
+Compare it to the `feature_directory` value in `.specify/feature.json`:
+
+- If `.specify/feature.json` is absent or empty → proceed normally to step 1.
+- If the directory name in `feature.json` **matches** the current issue/feature
+  (same NNN prefix or same short name) → trust it and proceed to step 1.
+- If the directory name in `feature.json` points to a **different feature**
+  (e.g. `specs/001-doc-ingestion-index` when the current issue is Feature 002)
+  → **treat feature.json as stale and skip it entirely**.
+  Log: `feature.json points to a different feature (<value>); ignoring for
+  this run — proceeding with specs/ directory scan.`
+  Continue from step 1 using only the specs/ scan (step 1 options 4–6).
+
+This guard prevents a completed feature's feature.json from silently routing a
+new feature into the wrong resume phase.
+
 ### 1. Resolve FEATURE_DIR
 
 In this order (stop at first hit):
