@@ -57,6 +57,7 @@ The workflow adds control around the commands, not inside them.
 ```
 CEO — Chief Spec Officer & Pipeline Orchestrator   (constitution, orchestration, single human gate)
 ├── Spec Analyst                                    (specify, clarify, spec-critic)
+├── Clarify Challenger                              (adversarial clarify review — runs before human gate)
 ├── Spec Reviewer                                   (independent spec gate — blocks planning)
 └── CTO — Chief Technology Officer                  (owns the build sub-pipeline)
     ├── Solution Architect                          (plan)

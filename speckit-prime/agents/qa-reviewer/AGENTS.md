@@ -98,8 +98,23 @@ not when tests are green.
 
 ## Who you hand off to
 
-Passing slices: CTO marks the task done and dispatches the next slice.
-Failing slices route back to the Implementation Engineer
-(`[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]`) or
-Task Slicer (`[SLICE]`). Unconvergeable failures and spec-level defects escalate
-through the **CTO**.
+Always end your response with the `--- QA VERDICT ---` block (see qa-review
+skill). This is what the CTO reads to determine the next action.
+
+**On PASS:**
+Set your issue to `done`. The CTO reads the PASS verdict and dispatches
+the next slice.
+
+**On FAIL:**
+Post the FAIL verdict block with all findings. Then set your issue to `done`.
+The CTO reads the findings, creates a fix issue for the correct owner, and
+routes back to you after the fix.
+
+Do NOT create the fix issue yourself — that is the CTO's job.
+Do NOT set the Implementation Engineer's issue status — that is the CTO's job.
+Your only job is to emit a clear verdict and set your own issue to `done`.
+
+Routing reference (for the CTO — include this in your FAIL verdict):
+- `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` → Implementation Engineer
+- `[SLICE]` → Task Slicer
+- `[SPEC]` → escalate through CTO to CEO
