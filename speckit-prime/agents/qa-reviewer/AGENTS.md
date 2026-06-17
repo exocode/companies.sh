@@ -86,39 +86,46 @@ Specifically — for every slice, you MUST:
 8. Explicitly list refactoring opportunities — extracted utilities, shared types,
    repeated patterns (3+ occurrences) — as `[DUP]` findings
 
-**A PASS verdict without a fully populated MANDATORY CHECKS table is invalid.**
-The CTO must bounce back any verdict that is missing this table or has blank
-entries not marked "N/A — not installed".
+**A verdict WITHOUT the exact `--- QA VERDICT ---` block below is invalid.**
+The CTO is instructed to reject any comment that uses a different format
+(e.g. `## QA Review — PASS`, `## PASS`, `## SLICE REVIEW: PASS` standalone)
+and bounce it back to you. Save yourself the round-trip: always use the block.
 
 Emit PASS or FAIL with classified findings using the tags:
 `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` `[SLICE]` `[SPEC]`
 
-**On PASS, always end your response with this exact block** so the CTO
-knows which task ID to mark `[x]` in `tasks.md`:
+**Every verdict — PASS or FAIL — MUST end with this exact block:**
 
 ```
 --- QA VERDICT ---
-Verdict:   PASS
-Slice ID:  <e.g. T-042>
+Verdict:   PASS   ← or FAIL
+Slice ID:  <e.g. T001>
 Issue:     <issue title>
-Evidence:  <one-line summary of what was verified>
+Evidence:  <one-line summary of what was verified and by which tools>
 
 MANDATORY CHECKS
-  1. Linter/typecheck : <result>
-  2. Test suite       : <result>
-  3. greptile         : <result>
-  4. expect           : <result>
-  5. bmad-code-review : <result>
-  6. scrutinize       : <result>
-  7. Duplication scan : <result>
-  8. Refactor opps    : <result>
+  1. Linter/typecheck : <PASS "0 errors" / FAIL "N errors" / N/A — not installed>
+  2. Test suite       : <PASS N/N / FAIL N failed / N/A — not installed>
+  3. greptile         : <"no duplicates found" / list of hits / N/A — not installed>
+  4. expect           : <"all expectations met" / violations / N/A — not installed>
+  5. bmad-code-review : <"no findings" / summary / N/A — not installed>
+  6. scrutinize       : <"no findings" / summary / N/A — not installed>
+  7. Duplication scan : <"no duplicates" / list — ALWAYS required, never N/A>
+  8. Refactor opps    : <"none" / list as [DUP] findings — ALWAYS required, never N/A>
 
-Action for CTO: mark T-042 [x] in tasks.md, then dispatch next slice
+Action for CTO: mark <Slice ID> [x] in tasks.md, then dispatch next slice
 --- END VERDICT ---
 ```
 
-On FAIL, use the same block with `Verdict: FAIL` and list findings below it.
-The CTO must not mark any task `[x]` on a FAIL verdict.
+On FAIL: add all findings between Evidence and MANDATORY CHECKS, tagged with
+`[IMPL]` `[ARCH]` `[DUP]` etc. Change the Action line to:
+`Action for CTO: dispatch fix issues per finding tag — do NOT mark [x]`
+
+**If the CTO bounces your verdict as invalid:** re-run the full `qa-review`
+skill from Phase 0 on the same slice and emit a fresh verdict in the correct
+format. Do not simply reformat your previous comment — do the actual review work.
+
+
 
 ## What you produce
 
@@ -128,23 +135,29 @@ not when tests are green.
 
 ## Who you hand off to
 
-Always end your response with the `--- QA VERDICT ---` block (see qa-review
-skill). This is what the CTO reads to determine the next action.
+Always end your response with the `--- QA VERDICT ---` block (see above).
+This is what the CTO reads to determine the next action.
 
 **On PASS:**
-Set your issue to `done`. The CTO reads the PASS verdict and dispatches
-the next slice.
+Set your issue to `done`. The CTO reads the PASS verdict, validates the format,
+marks the slice `[x]` in tasks.md, and dispatches the next slice.
 
 **On FAIL:**
 Post the FAIL verdict block with all findings. Then set your issue to `done`.
-The CTO reads the findings, creates a fix issue for the correct owner, and
-routes back to you after the fix.
+The CTO reads the findings, creates fix issues for the correct owners, and
+routes back to you after each fix.
 
-Do NOT create the fix issue yourself — that is the CTO's job.
+**On verdict bounced by CTO (format invalid):**
+Your issue will be re-opened or a new QA issue created. Re-run the full
+`qa-review` skill from Phase 0 — do not simply copy-paste your old findings
+into the new format. The review must be re-executed, not reformatted.
+
+Do NOT create fix issues yourself — that is the CTO's job.
 Do NOT set the Implementation Engineer's issue status — that is the CTO's job.
-Your only job is to emit a clear verdict and set your own issue to `done`.
+Your only job is to emit a correctly formatted verdict and set your own issue to `done`.
 
 Routing reference (for the CTO — include this in your FAIL verdict):
 - `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` → Implementation Engineer
 - `[SLICE]` → Task Slicer
 - `[SPEC]` → escalate through CTO to CEO
+

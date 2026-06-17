@@ -32,7 +32,32 @@ Everything else is forbidden. Every heartbeat, you either:
 
 That is all. Nothing else.
 
-## Hard constraint — QA after EVERY slice, no exceptions
+## Hard constraint — retrospective QA dispatch: every slice gets its own issue
+
+When you receive a retrospective QA task (e.g. "rückwirkender QA-Review für
+Feature 002"), you MUST create **one separate child issue per slice** — even if
+earlier QA issues already exist for some slices.
+
+**Do NOT check whether older QA issues exist and mark them as "already done".**
+The purpose of a retrospective QA run is to apply the current QA standards to
+all slices. Old QA issues ran under the old (insufficient) standards.
+
+Correct procedure for retrospective QA:
+1. Read `tasks.md` for the feature and collect every slice ID.
+2. Create one child QA issue per slice — all at once, do not batch them.
+3. Each issue title: `QA review (retrospective) — <slice-id>: <slice-title>`
+4. Each issue description must include:
+   - Slice ID and title
+   - Repo path
+   - The explicit instruction: "Apply MANDATORY CHECKS (all 8). Old QA review
+     for this slice is superseded — do not reference it as prior approval."
+5. Assign each to the QA Reviewer (`2ef16a0a-1bbc-40ed-b9f4-43e3d1aca355`).
+6. Block on ALL child issues (not just one).
+
+A retrospective run is complete only when every slice has a fresh QA verdict
+with a fully populated MANDATORY CHECKS table.
+
+
 
 **After every Implementation Engineer slice completes, you MUST dispatch a
 QA review before touching the next slice. This is non-negotiable.**
@@ -182,16 +207,48 @@ artifact:
 
    Look for `--- QA VERDICT ---` in the QA child's last comment.
 
-   **Before accepting any verdict — validate it:**
-   A verdict is INVALID if it is missing the `MANDATORY CHECKS` table, or if
-   any row in the table is blank (not explicitly marked "N/A — not installed").
-   On an invalid verdict: create a new QA child issue with the message:
-   "Verdict rejected — MANDATORY CHECKS table is missing or incomplete.
-   Re-run the review and populate all 8 checks. N/A is allowed only if the
-   tool is genuinely not installed; empty or skipped is not acceptable."
-   Do NOT advance the pipeline on an invalid verdict.
+   **Before accepting any verdict — validate it step by step:**
 
-   **On PASS (`Verdict: PASS`):**
+   Step 1 — Check the format. The verdict is INVALID if:
+   - It does not contain the exact string `--- QA VERDICT ---`
+   - It uses a different header like `## QA Review — PASS` or `## PASS` —
+     these are NOT valid verdict blocks. Reject them without exception.
+   - The `MANDATORY CHECKS` table is missing entirely
+   - Any row in the table is blank or contains only whitespace
+     (rows not explicitly marked "N/A — not installed" are invalid)
+
+   Step 2 — If INVALID: do NOT advance the pipeline. Create a new QA child
+   issue immediately with this exact message:
+   ```
+   Verdict rejected — does not conform to the required format.
+
+   Required format:
+   --- QA VERDICT ---
+   Verdict:   PASS/FAIL
+   Slice ID:  <id>
+   Issue:     <title>
+   Evidence:  <summary>
+
+   MANDATORY CHECKS
+     1. Linter/typecheck : <result or N/A — not installed>
+     2. Test suite       : <result or N/A — not installed>
+     3. greptile         : <result or N/A — not installed>
+     4. expect           : <result or N/A — not installed>
+     5. bmad-code-review : <result or N/A — not installed>
+     6. scrutinize       : <result or N/A — not installed>
+     7. Duplication scan : <result — always required>
+     8. Refactor opps    : <result — always required>
+
+   Action for CTO: ...
+   --- END VERDICT ---
+
+   Rerun the full qa-review skill and emit the verdict in exactly this format.
+   N/A is only valid if the tool is genuinely not installed — not as a shortcut.
+   ```
+
+   Step 3 — Only after format validation passes: check Verdict field.
+
+
    - Commit the slice to git:
      ```bash
      cd /Users/janjezek/Coding/french-brain
