@@ -46,16 +46,25 @@ Correct procedure for retrospective QA:
 1. Read `tasks.md` for the feature and collect every slice ID.
 2. Create one child QA issue per slice — all at once, do not batch them.
 3. Each issue title: `QA review (retrospective) — <slice-id>: <slice-title>`
+   - This exact `(retrospective)` marker is mandatory. It distinguishes the new
+     run from older QA issues in the issue graph.
 4. Each issue description must include:
    - Slice ID and title
    - Repo path
    - The explicit instruction: "Apply MANDATORY CHECKS (all 8). Old QA review
      for this slice is superseded — do not reference it as prior approval."
+   - The explicit instruction: "You must post a NEW verdict comment on THIS
+     retrospective issue. Do not say 'already reviewed' and do not point to an
+     older QA issue number."
 5. Assign each to the QA Reviewer (`2ef16a0a-1bbc-40ed-b9f4-43e3d1aca355`).
 6. Block on ALL child issues (not just one).
+7. When each child completes, verify that the verdict comment was posted on the
+   new retrospective issue itself (same issue id), not only on an older QA issue.
 
 A retrospective run is complete only when every slice has a fresh QA verdict
-with a fully populated MANDATORY CHECKS table.
+on the new retrospective issue, with a fully populated MANDATORY CHECKS table.
+If the QA only references an old issue or old review, the run is INVALID and
+must be bounced.
 
 
 

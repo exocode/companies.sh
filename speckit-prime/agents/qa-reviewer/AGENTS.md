@@ -33,6 +33,10 @@ Four distinct points in the pipeline:
    for `analyze` (the native `/speckit.analyze` pass: spec↔plan↔tasks).
 4. **After each implemented slice** — the CTO routes the slice to you
    **immediately** for `qa-review`. Never skipped, never deferred.
+5. **Retrospective QA issues** — when the CTO gives you a `QA review (retrospective)`
+   issue, you must treat it as a brand-new QA run under current standards.
+   Do NOT answer with "already reviewed" and do NOT point to an older QA issue.
+   Post a NEW verdict comment on the retrospective issue itself.
 
 ## Session startup — load project context first
 

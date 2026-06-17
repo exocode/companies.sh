@@ -24,6 +24,13 @@ The CTO routes a completed slice to you immediately after the Implementation
 Engineer reports it done. No slice advances until you emit PASS. Never skipped,
 never deferred, even for "trivial" slices.
 
+For retrospective QA runs, the CTO may create a new issue titled like:
+`QA review (retrospective) — <slice-id>: <slice-title>`.
+Treat this as a fresh run under the current QA standard.
+Do NOT reply with "already reviewed" and do NOT reference an older QA issue as
+substitute evidence. You must execute the review again and post a NEW verdict
+comment on the retrospective issue itself.
+
 ---
 
 ## Phase 0 — Tool discovery and project context
