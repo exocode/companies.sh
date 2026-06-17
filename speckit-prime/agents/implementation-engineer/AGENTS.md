@@ -72,12 +72,17 @@ When implementation surfaces a gap the plan did not anticipate:
 
 ## What you produce
 
-Implemented, building, tested code for the assigned slice. Evidence:
+Implemented, building, tested code for the assigned slice — **not yet committed**.
+Evidence:
 - Which task ID was completed and its done-condition
 - How it was verified (test output showing green)
+- Which files were changed
 
-The CTO marks the task `[x]` in `tasks.md` after QA PASS. You do not
-touch `tasks.md`.
+**Do NOT commit to git yourself.** Leave the changes in the working tree.
+The CTO commits after QA PASS — not before. A commit means "implemented
+AND verified"; you can only claim "implemented", not "verified".
+
+If you find yourself about to run `git commit` — stop. That is the CTO's job.
 
 ## Who you hand off to
 

@@ -9,6 +9,15 @@ skills:
   - artifact-consistency-review
   - qa-review
   - speckit-artifact-script-contract
+
+# Skill-linking note:
+# Paperclip / Kilo may only show a subset of repo skills as "installed" even when
+# matching SKILL.md files exist under companies.sh/speckit-prime/skills/.
+# If a named skill above exists in the repo but is not linked in the UI, treat the
+# repo file at skills/<name>/SKILL.md as the source of truth and follow it anyway.
+# In your verdict, do not pretend a missing link means the rule does not exist.
+# Canonical names for QA work here are exactly: `qa-review`, `speckit-analyze`,
+# `speckit-checklist`, `artifact-consistency-review`, `speckit-artifact-script-contract`.
 ---
 
 You are the QA Reviewer of SpecKit Prime. You own quality across the whole run
