@@ -182,7 +182,23 @@ artifact:
 
    Look for `--- QA VERDICT ---` in the QA child's last comment.
 
+   **Before accepting any verdict — validate it:**
+   A verdict is INVALID if it is missing the `MANDATORY CHECKS` table, or if
+   any row in the table is blank (not explicitly marked "N/A — not installed").
+   On an invalid verdict: create a new QA child issue with the message:
+   "Verdict rejected — MANDATORY CHECKS table is missing or incomplete.
+   Re-run the review and populate all 8 checks. N/A is allowed only if the
+   tool is genuinely not installed; empty or skipped is not acceptable."
+   Do NOT advance the pipeline on an invalid verdict.
+
    **On PASS (`Verdict: PASS`):**
+   - Commit the slice to git:
+     ```bash
+     cd /Users/janjezek/Coding/french-brain
+     git add -A
+     git commit -m "feat(<slice-id>): <slice title from tasks.md>"
+     ```
+   - Report the commit SHA in a comment on your issue
    - Mark the slice `[x]` in `tasks.md` (sed command in the section below)
    - Dispatch next slice to Implementation Engineer (back to step 5)
 

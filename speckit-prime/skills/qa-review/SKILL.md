@@ -41,6 +41,7 @@ the agent is configured. Look across all categories:
 - Call-graph, dependency, or reference-finding tools
 - Anything that can answer: "where is this symbol used?" or "what does this
   module export?"
+- `greptile` — semantic codebase search; use if available
 
 **Memory / cross-session context** — tools that persist knowledge:
 - Agent memory tools (key-value stores, vector stores, note tools)
@@ -51,10 +52,18 @@ the agent is configured. Look across all categories:
   `.pre-commit-config.yaml`, `.eslintrc*`, `ruff.toml`, `biome.json`, etc.
 - Any CI config that defines what "quality gate" means for this project
 - Run whatever linters/type checkers are configured — their output is evidence
+- `expect` / `expect.dev` — AI-assisted code expectations; use if available
+
+**Adversarial review skills** — skills that apply a parallel adversarial lens:
+- `bmad-code-review` — parallel Blind Hunter / Edge Case Hunter / Acceptance
+  Auditor review; load and run if available
+- `scrutinize` — outsider-perspective end-to-end plan/code review; use if available
+- `bmad-review-adversarial-general` — cynical review; use if available
 
 **Search and duplication detection** — tools that find similar code:
 - Semantic or structural code search
 - Anything that can locate similar functions, classes, or patterns across the repo
+- `greptile` queries for duplicated patterns (see 0e below)
 
 For each category, note what is available. If nothing is found in a category,
 fall back to manual code reading — never skip a review dimension because a
@@ -68,9 +77,31 @@ TOOL INVENTORY
   Memory:            <tool names, or "session-only">
   Static analysis:   <tools found + commands, or "none configured">
   Search/dup detect: <tool names, or "manual">
+  Adversarial skills: <skill names loaded, or "none available">
 ```
 
 Use every tool you found. A tool available but unused is a missed finding.
+
+### 0e. Mandatory check execution — run ALL available tools
+
+This phase is **not optional**. For each available tool below, execute it and
+record the output as evidence in your verdict. If a tool is unavailable, mark
+it explicitly as "N/A — not installed" — do NOT silently skip it.
+
+| # | Tool / Check | When available — what to run |
+|---|---|---|
+| 1 | **Linter / type-checker** | Run the project's lint + typecheck commands (e.g. `pnpm lint`, `pnpm typecheck`, `ruff check`, `mypy`). Paste the summary. FAIL if any new error. |
+| 2 | **Test suite** | Run the relevant test suite for the changed package. FAIL if any test is red. Paste pass/fail count. |
+| 3 | **greptile** | Query for each new public symbol introduced by the slice: "does a similar function/class already exist?". Report exact matches or near-duplicates. |
+| 4 | **expect / expect.dev** | Run expectations against the changed files. Report any violated expectations. |
+| 5 | **bmad-code-review skill** | Load and execute. Report all findings from all three review layers (Blind Hunter, Edge Case Hunter, Acceptance Auditor). |
+| 6 | **scrutinize skill** | Load and execute for an outsider-perspective pass. Report findings. |
+| 7 | **Manual duplication scan** | If greptile is unavailable: grep/search for each new function name and type name across the whole repo. Report any hits outside the changed files. |
+| 8 | **Refactoring opportunities** | After running available tools: note any code that should be extracted to a shared utility, any type that belongs in a shared package, any pattern repeated 3+ times. These are [DUP] findings. |
+
+Populate the MANDATORY CHECKS table in your verdict (see Phase 4). Any check
+left blank without an explicit "N/A — not installed" is grounds to reject the
+verdict automatically.
 
 ### 0b. Load project context
 
@@ -194,6 +225,27 @@ Read every test added or modified for this slice:
 - All slice-scope requirements have test coverage (Phase 3)
 - No undocumented public API
 
+### Mandatory checks evidence table
+
+Every verdict — PASS or FAIL — MUST include this table, fully populated.
+A verdict without this table, or with blank cells that are not marked
+"N/A — not installed", is invalid and the CTO must bounce it back.
+
+```
+MANDATORY CHECKS
+  1. Linter/typecheck : <PASS / FAIL — paste summary line> | N/A — not installed
+  2. Test suite       : <PASS n/n / FAIL n failed> | N/A — not installed
+  3. greptile         : <"no duplicates found" / list of hits> | N/A — not installed
+  4. expect           : <"all expectations met" / list of violations> | N/A — not installed
+  5. bmad-code-review : <"no findings" / summary of findings> | N/A — not installed
+  6. scrutinize       : <"no findings" / summary of findings> | N/A — not installed
+  7. Duplication scan : <"no duplicates" / list of duplicate symbols> | (always required)
+  8. Refactor opps    : <"none" / list of opportunities as [DUP] findings> | (always required)
+```
+
+Any check marked FAIL automatically makes the slice verdict FAIL, even if all
+other checks pass.
+
 ### Fail output
 
 ```
@@ -202,6 +254,16 @@ Slice: <task-id> — <task-title>
 
 TOOL INVENTORY (used this review):
   <as above>
+
+MANDATORY CHECKS
+  1. Linter/typecheck : <result>
+  2. Test suite       : <result>
+  3. greptile         : <result>
+  4. expect           : <result>
+  5. bmad-code-review : <result>
+  6. scrutinize       : <result>
+  7. Duplication scan : <result>
+  8. Refactor opps    : <result>
 
 Findings:
 [IMPL]  <file>:<line> — <defect> — fix: <what to change>
@@ -226,6 +288,16 @@ Slice: <task-id> — <task-title>
 
 TOOL INVENTORY (used this review):
   <as above>
+
+MANDATORY CHECKS
+  1. Linter/typecheck : <result>
+  2. Test suite       : <result>
+  3. greptile         : <result>
+  4. expect           : <result>
+  5. bmad-code-review : <result>
+  6. scrutinize       : <result>
+  7. Duplication scan : <result>
+  8. Refactor opps    : <result>
 
 Summary: <one sentence — what was verified and by which tools>
 ```

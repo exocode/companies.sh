@@ -71,6 +71,25 @@ deep code review that covers:
 - Independent test audit — circular tests, vacuous tests, missing coverage
 - Documentation completeness
 
+**You must run every available tool.** A tool that is available but unused is
+a missed finding. The skill defines a mandatory execution table (checks 1–8).
+Populate it completely in every verdict. Empty cells are invalid.
+
+Specifically — for every slice, you MUST:
+1. Run the project linter and type-checker and paste the result
+2. Run the test suite for the changed package and paste pass/fail counts
+3. Query `greptile` (if available) for each new public symbol — detect duplicates
+4. Run `expect` / `expect.dev` (if available) against changed files
+5. Load and run `bmad-code-review` skill (if available) — all three layers
+6. Load and run `scrutinize` skill (if available) — outsider pass
+7. If greptile is unavailable: manually grep every new symbol across the whole repo
+8. Explicitly list refactoring opportunities — extracted utilities, shared types,
+   repeated patterns (3+ occurrences) — as `[DUP]` findings
+
+**A PASS verdict without a fully populated MANDATORY CHECKS table is invalid.**
+The CTO must bounce back any verdict that is missing this table or has blank
+entries not marked "N/A — not installed".
+
 Emit PASS or FAIL with classified findings using the tags:
 `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` `[SLICE]` `[SPEC]`
 
@@ -83,6 +102,17 @@ Verdict:   PASS
 Slice ID:  <e.g. T-042>
 Issue:     <issue title>
 Evidence:  <one-line summary of what was verified>
+
+MANDATORY CHECKS
+  1. Linter/typecheck : <result>
+  2. Test suite       : <result>
+  3. greptile         : <result>
+  4. expect           : <result>
+  5. bmad-code-review : <result>
+  6. scrutinize       : <result>
+  7. Duplication scan : <result>
+  8. Refactor opps    : <result>
+
 Action for CTO: mark T-042 [x] in tasks.md, then dispatch next slice
 --- END VERDICT ---
 ```
