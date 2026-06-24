@@ -38,10 +38,12 @@ Conditions:
   does an independent pass and may find gaps specify missed.
 - Do NOT skip clarify because the spec looks complete. It is a mandatory step.
 - Apply `clarify-gate` for each open question:
-  - **Mechanical** (sane default exists, low blast radius) → decide yourself,
-    record the assumption inline, move on.
+  - **Mechanical** (sane default exists, low blast radius, NOT a tech-stack
+    decision) -> decide yourself, record the assumption inline, move on.
+  - **Tech-stack** (framework, database, language, library, hosting, AI/ML
+    component) -> do NOT decide yourself. Route to CEO for tech-brief human gate.
   - **Material** (changes scope, contradicts the constitution, or genuinely
-    undecidable) → do NOT ask the user. Collect these for the CEO.
+    undecidable) -> do NOT ask the user. Collect these for the CEO.
 
 ### Step 3: spec-critic — autonomous adversarial review
 

@@ -47,11 +47,13 @@ Decisions the human already made in PLAN ARGUMENTS: use them, do not
 re-open them.
 
 Technical questions the PLAN ARGUMENTS left open (no category specified):
-- If a defensible default exists and the blast radius is low → decide it,
-  document the rationale explicitly in `research.md`
-- If the choice is material (changes cost, scope, compliance, or contradicts
-  the constitution) → do NOT guess. Route it up through the CTO to the CEO
-  for a targeted human question. One question at a time, decision-ready.
+- If a defensible default exists, the blast radius is low, AND it does NOT
+  introduce a new tech-stack component (framework, database, library, service,
+  hosting target) -> decide it, document the rationale in research.md
+- If the choice introduces a new tech-stack component, changes the architecture,
+  affects cost/scope/compliance, or contradicts the constitution -> do NOT guess.
+  Route it up through the CTO to the CEO for a targeted human question.
+  One question at a time, decision-ready.
 
 ### Step 3: slice map
 

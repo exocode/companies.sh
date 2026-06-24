@@ -44,7 +44,13 @@ Ask the user only when a decision cannot be inferred safely:
 - mutually exclusive behavior with no clear default
 - stakeholder preference that changes the value proposition
 
-For engineering choices with a safe default, choose conservatively, document the assumption, and continue.
+For engineering choices with a safe default that do NOT affect the tech stack
+(language, framework, database, libraries, infrastructure, AI/ML components),
+choose conservatively, document the assumption, and continue.
+
+Tech-stack decisions are NEVER autonomous. They go through the CEO's tech-brief
+human gate (see `tech-brief` skill). No agent may choose a framework, database,
+language, library, hosting target, or AI/ML provider without human approval.
 
 ## Run Ledger
 

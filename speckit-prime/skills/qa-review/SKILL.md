@@ -285,7 +285,25 @@ Findings:
 
 Earliest affected phase: <implement | tasks | plan | spec>
 Downstream commands needing rerun: <list or none>
+
+NEXT ACTION:
+  Assignee: Implementation Engineer
+  Fix items:
+  1. <file>:<line> — <concrete fix instruction (imperative, not descriptive)>
+  2. <file>:<line> — <concrete fix instruction>
+  ...
+  After fix: re-dispatch this slice to QA Reviewer for re-verification.
 ```
+
+**The NEXT ACTION block is mandatory on every FAIL verdict.** It must:
+- Name the agent who must do the fix (almost always Implementation Engineer)
+- List each fix as a concrete imperative instruction (not "there is a problem"
+  but "change X to Y in file Z")
+- State that re-verification is required after the fix
+
+This block exists so the CTO can create a fix-issue by copy-pasting the NEXT
+ACTION contents directly into the child-issue description. The CTO does not
+interpret findings — you (QA Reviewer) prescribe the fix, the CTO dispatches it.
 
 ### Pass output
 
@@ -319,8 +337,8 @@ feature.json reset.
 
 The CEO is responsible for the reset; the QA Reviewer only signals readiness.
 
-- `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` → back to Implementation Engineer
-- `[SLICE]` → back to Task Slicer
+- `[IMPL]` `[ARCH]` `[DUP]` `[DRIFT]` `[TEST]` `[COV]` `[DOC]` → back to Implementation Engineer (via NEXT ACTION block)
+- `[SLICE]` → back to Task Slicer (via NEXT ACTION block)
 - `[SPEC]` → up through CTO to the right owner
 
 ---

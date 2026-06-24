@@ -67,6 +67,10 @@ the CRITIC REPORT.
   Read the constitution first if not already loaded.
 - Does the spec introduce technology choices, architecture decisions, or team
   norms that the constitution prohibits or reserves for the planning phase?
+- Does the spec hardcode a tech-stack decision (framework, database, language,
+  library, hosting target, AI/ML component) that bypasses the tech-brief
+  human gate? If yes, flag as [BLOCK] — tech-stack decisions belong in the
+  tech-brief gate, not in the spec. The spec must describe WHAT, not HOW.
 - Does the scope match the boundaries the constitution sets for this type of
   feature?
 

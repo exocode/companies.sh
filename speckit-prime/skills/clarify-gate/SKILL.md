@@ -41,10 +41,19 @@ Use this skill whenever you encounter an open question, missing information, or 
    - What will be blocked until the decision is made
 4. Let the CEO batch it with other pending questions before surfacing to the human
 
-## Never ask about
+## Never ask about (these are safe mechanical defaults)
 
 - Data retention (use industry standard for the domain)
 - Performance targets (use standard web/mobile expectations unless specified)
 - Error handling style (user-friendly messages with fallbacks)
-- Authentication method (standard session or OAuth2 for web apps)
 - Integration patterns (use what the project already uses)
+
+## Always route to CEO (these are tech-stack decisions requiring human input)
+
+- Authentication method (OAuth2 vs session vs API key — changes architecture)
+- Database type or product (Postgres vs MongoDB vs Redis etc.)
+- Framework choice (FastAPI vs Django vs Express vs Next.js etc.)
+- Primary language (Python vs TypeScript vs Go etc.)
+- Hosting / deployment target (Docker, serverless, on-prem)
+- AI/ML components (LLM provider, embedding model, inference runtime)
+- Any decision that introduces a new dependency, service, or infrastructure component
