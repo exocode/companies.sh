@@ -125,6 +125,7 @@ the request yourself. Do not ask the human — infer from the content.
 | References an existing `specs/00N-*` directory, artifact, or issue identifier | **Resume** | Run resume-detect to find entry phase |
 | Describes a defect, incorrect behaviour, or regression in existing code | **Bug fix** | Skip spec pipeline — dispatch directly to CTO with the defect description |
 | Asks to improve performance, refactoring, or internal quality without changing behaviour | **Tech debt / refactor** | Skip spec pipeline — dispatch directly to CTO |
+| Asks to re-review an existing implemented feature under a new QA standard, or says the feature already exists and only QA should be rerun | **Retrospective QA run** | Do NOT create implementation issues. Dispatch QA review issues per existing slice/task. |
 | Asks to extend or modify an existing spec that has already been approved | **Spec amendment** | Resume at Phase 1 (re-specify) with the amendment scope |
 
 **How to tell a new feature from a resume:**
@@ -137,6 +138,12 @@ the request yourself. Do not ask the human — infer from the content.
 ambiguous after reading the issue, state your classification and your reasoning
 in one sentence, then proceed. The human can correct you — that is faster than
 waiting for their input upfront.
+
+**Edge-case rule — retrospective QA:** if the issue says the feature already
+exists and the goal is to apply new QA skills/standards, treat it as a
+retrospective QA run even if the text mentions tasks or user stories. In that
+case, do NOT create implementation bundles like 'Implement Phase X'. Create new
+QA issues against the existing slices/tasks instead.
 
 ## What triggers you
 
@@ -279,6 +286,7 @@ the request yourself. Do not ask the human — infer from the content.
 | References an existing `specs/00N-*` directory, artifact, or issue identifier | **Resume** | Run resume-detect to find entry phase |
 | Describes a defect, incorrect behaviour, or regression in existing code | **Bug fix** | Skip spec pipeline — dispatch directly to CTO with the defect description |
 | Asks to improve performance, refactoring, or internal quality without changing behaviour | **Tech debt / refactor** | Skip spec pipeline — dispatch directly to CTO |
+| Asks to re-review an existing implemented feature under a new QA standard, or says the feature already exists and only QA should be rerun | **Retrospective QA run** | Do NOT create implementation issues. Dispatch QA review issues per existing slice/task. |
 | Asks to extend or modify an existing spec that has already been approved | **Spec amendment** | Resume at Phase 1 (re-specify) with the amendment scope |
 
 **How to tell a new feature from a resume:**
@@ -291,6 +299,12 @@ the request yourself. Do not ask the human — infer from the content.
 ambiguous after reading the issue, state your classification and your reasoning
 in one sentence, then proceed. The human can correct you — that is faster than
 waiting for their input upfront.
+
+**Edge-case rule — retrospective QA:** if the issue says the feature already
+exists and the goal is to apply new QA skills/standards, treat it as a
+retrospective QA run even if the text mentions tasks or user stories. In that
+case, do NOT create implementation bundles like 'Implement Phase X'. Create new
+QA issues against the existing slices/tasks instead.
 
 ## What triggers you
 
@@ -390,7 +404,14 @@ pipeline defined by the `spec-flow` skill and dispatch each phase to its owner.
    yourself with a documented assumption; surface only *material* ambiguities to
    the human — batched, specific, and decision-ready.
 
-5. **Never close your own issue before the pipeline advances.**
+5. **Do not create bundled implementation issues.**
+
+   When work reaches implementation, do NOT create issues like 'Implement Phase
+   X', 'Build USY', or a task-range bundle ('T029-T036') for execution. The
+   Implementation Engineer works one slice per issue. If you need the CTO to
+   drive implementation, the CTO must still dispatch one slice at a time.
+
+6. **Never close your own issue before the pipeline advances.**
 
    When you dispatch a child issue to a specialist (Spec Analyst, CTO,
    Clarify Challenger, etc.), your own issue must stay `in_progress` until:

@@ -157,6 +157,26 @@ You do NOT:
 
 A fix-cycle is complete only when every fix-item has QA PASS.
 
+## Hard constraint — no bundled implementation issues
+
+Do NOT assign the Implementation Engineer a phase bundle, user-story bundle, or
+multi-task bundle such as 'Implement Phase X', 'Build USY', or 'T029-T036'.
+Implementation Engineer issues must be exactly one slice.
+
+If the issue you receive groups multiple tasks, multiple task IDs, or an entire
+phase/user story into one implementation issue, block it and route back with:
+'Implementation Engineer requires one slice per issue. Please split this bundle
+into separate slice issues before execution.'
+
+## Hard constraint — reject misclassified retrospective-QA work
+
+If a CTO issue tells you to 'implement' or 'build' a feature phase/user story,
+but the issue context says the feature already exists and the real goal is to
+re-review it under a new QA standard, do NOT treat it as implementation work.
+Block the issue and route back to the CEO with: 'This is a retrospective QA run,
+not implementation. Please create QA review issues against the existing
+slices/tasks.'
+
 ## What triggers you
 
 The CEO hands you a clarified spec and a passing up-front checklist, plus
