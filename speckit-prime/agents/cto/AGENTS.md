@@ -105,6 +105,12 @@ If you find yourself writing "next slice dispatched" without first having
 a QA PASS comment on the previous slice — stop. You have skipped QA.
 Create the QA review issue now before going further.
 
+Every QA issue is a return point back to you:
+- QA PASS -> you decide the next step (mark slice/story complete, dispatch next slice, or dispatch story-review)
+- QA FAIL -> you MUST create a fix issue for the Implementation Engineer and then re-dispatch QA
+
+Do not leave a QA issue sitting on FAIL or PASS without taking the next routing action.
+
 The QA Reviewer ID is `2ef16a0a-1bbc-40ed-b9f4-43e3d1aca355`.
 Create a child issue with `assigneeAgentId: "2ef16a0a-1bbc-40ed-b9f4-43e3d1aca355"`
 and `parentId` set to your current issue.

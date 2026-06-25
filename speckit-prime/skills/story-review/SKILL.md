@@ -62,11 +62,12 @@ Findings:
 [DOC]   <doc/quickstart drift> — fix: <what to update>
 
 NEXT ACTION:
+  Return owner: CTO
   Assignee: Implementation Engineer
   Fix items:
   1. <concrete fix instruction>
   2. <concrete fix instruction>
-  After fix: re-dispatch this story to QA Reviewer for story re-review.
+  CTO action: create a fix issue for the Implementation Engineer, then re-dispatch this story to QA Reviewer for story re-review.
 ```
 
 ### PASS
@@ -77,6 +78,8 @@ Story: <story-id> — <story-title>
 
 Summary:
   <one paragraph confirming the integrated story works as a whole>
+Return owner: CTO
+CTO action: mark the user story complete or continue to the next story/final checkpoint.
 ```
 
 ## Routing

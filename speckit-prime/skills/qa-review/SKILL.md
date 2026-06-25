@@ -287,12 +287,13 @@ Earliest affected phase: <implement | tasks | plan | spec>
 Downstream commands needing rerun: <list or none>
 
 NEXT ACTION:
+  Return owner: CTO
   Assignee: Implementation Engineer
   Fix items:
   1. <file>:<line> — <concrete fix instruction (imperative, not descriptive)>
   2. <file>:<line> — <concrete fix instruction>
   ...
-  After fix: re-dispatch this slice to QA Reviewer for re-verification.
+  CTO action: create a fix issue for the Implementation Engineer, then re-dispatch this slice to QA Reviewer for re-verification.
 ```
 
 **The NEXT ACTION block is mandatory on every FAIL verdict.** It must:
@@ -325,6 +326,8 @@ MANDATORY CHECKS
   8. Refactor opps    : <result>
 
 Summary: <one sentence — what was verified and by which tools>
+Return owner: CTO
+CTO action: mark the slice complete (or dispatch the next slice / next gate).
 ```
 
 If this is the **last open slice** in `tasks.md` (all others already marked
