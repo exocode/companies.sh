@@ -24,6 +24,11 @@ The CTO dispatches this review when:
 
 Review the user story as an integrated whole:
 
+Before reviewing, check whether any MCP server/tools/resources are available
+and relevant to the story (code graph, repo search, API/schema inspection,
+browser/devtools, tracing, etc.). If yes, use them where they improve the
+integrated review; do not default to manual grep/read only.
+
 1. **Cross-slice behavior**
    - Do the completed slices work together end-to-end?
    - Are there hidden mismatches at boundaries (API, state, events, models)?

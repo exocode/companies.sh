@@ -41,7 +41,13 @@ Do this once per QA session (or whenever the project changes).
 
 Before reviewing anything, survey every tool and skill available to you in
 this session. Do not assume a fixed set — what is available depends on how
-the agent is configured. Look across all categories:
+the agent is configured. Look across all categories.
+
+**MCP server rule:** if MCP tools/resources are available and relevant to the
+project (code intelligence, graph search, API/schema inspection, browser/devtools,
+repo analysis, etc.), you MUST inspect them first and use them where they improve
+review quality. Do not default to grep/manual read if a suitable MCP capability
+exists.
 
 **Code intelligence** — tools that understand code structure:
 - Graph or symbol analysis (e.g. codegraph, tree-sitter integrations)
