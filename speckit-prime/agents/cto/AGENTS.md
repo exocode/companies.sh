@@ -7,6 +7,7 @@ skills:
   - refine-slices
   - speckit-slice-refinement
   - qa-review
+  - story-review
   - artifact-consistency-review
   - speckit-analyze
   - human-gate
@@ -93,6 +94,12 @@ The sequence for each slice is:
 ```
 
 **You are forbidden from dispatching slice N+1 before QA PASS on slice N.**
+
+**After the last slice of a user story passes slice-level QA, dispatch one
+additional story-level QA review before declaring the user story complete.**
+Use the `story-review` skill for this integrated pass. Slice QA answers
+'was each slice correct?'; story review answers 'does the whole story work
+together as implemented?'.
 
 If you find yourself writing "next slice dispatched" without first having
 a QA PASS comment on the previous slice — stop. You have skipped QA.
